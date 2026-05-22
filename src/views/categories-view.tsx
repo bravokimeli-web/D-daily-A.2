@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/products";
 import { Lightbulb, Home, Leaf, Sparkles } from "lucide-react";
@@ -41,10 +42,12 @@ export function CategoriesView({ initialProducts }: CategoriesViewProps) {
               <p className="mt-4 text-muted-foreground">{c.description}</p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 {items.slice(0, 4).map((p) => (
-                  <img
+                  <Image
                     key={p.slug}
                     src={resolveMediaUrl(String(p.image))}
                     alt={p.name}
+                    width={56}
+                    height={56}
                     className="h-14 w-14 rounded-xl border-2 border-card object-cover bg-surface"
                   />
                 ))}

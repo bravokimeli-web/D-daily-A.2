@@ -5,7 +5,7 @@ type AppRoutes = "/" | "/about" | "/admin" | "/cart" | "/categories" | "/checkou
 type PageRoutes = never
 type LayoutRoutes = "/"
 type RedirectRoutes = never
-type RewriteRoutes = "/api/[[...path]]" | "/uploads/[[...path]]"
+type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
 
 
@@ -13,7 +13,6 @@ interface ParamMap {
   "/": {}
   "/about": {}
   "/admin": {}
-  "/api/[[...path]]": { "path"?: string[]; }
   "/cart": {}
   "/categories": {}
   "/checkout": {}
@@ -26,7 +25,6 @@ interface ParamMap {
   "/safety": {}
   "/shop": {}
   "/terms": {}
-  "/uploads/[[...path]]": { "path"?: string[]; }
 }
 
 

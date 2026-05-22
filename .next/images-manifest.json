@@ -33,7 +33,7 @@
     "remotePatterns": [
       {
         "protocol": "https",
-        "hostname": "^(?:^(?:api\\.ddaily\\.co\\.ke)$)$",
+        "hostname": "^(?:^(?:d\\-daily\\-e\\-commerce\\-backend\\.onrender\\.com)$)$",
         "pathname": "^(?:\\/uploads(?:\\/(?!\\.{1,2}(?:\\/|$))(?:(?:(?!(?:^|\\/)\\.{1,2}(?:\\/|$)).)*?)|$))$"
       },
       {

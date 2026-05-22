@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCart, cartTotals } from "@/store/carts";
 import { formatKES } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Truck, CheckCircle2, Loader2 } from "lucide-react";
+import { Smartphone, Truck, Loader2 } from "lucide-react";
 import { FormEvent, InputHTMLAttributes, useState } from "react";
 import { toast } from "sonner";
 import { ordersApi } from "@/lib/api";
@@ -13,7 +12,6 @@ export function CheckoutView() {
   const { items, clear } = useCart();
   const { subtotal } = cartTotals(items);
   const [courier, setCourier] = useState("Swatin");
-  const [placed, setPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,19 +22,6 @@ export function CheckoutView() {
 
   const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim());
   const canSubmit = items.length > 0 && hasRequiredInfo;
-
-  if (placed) {
-    return (
-      <div className="container-px mx-auto max-w-xl py-24 text-center">
-        <CheckCircle2 className="h-14 w-14 text-success mx-auto" />
-        <h1 className="mt-5 font-display text-3xl font-bold">Order received!</h1>
-        <p className="mt-2 text-muted-foreground">We'll send M-PESA STK push and confirm your order via SMS shortly.</p>
-        <Button asChild className="mt-6 rounded-full">
-          <Link href="/shop">Continue shopping</Link>
-        </Button>
-      </div>
-    );
-  }
 
   const place = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCart, cartTotals } from "@/store/carts";
 import { formatKES } from "@/data/products";
 import { Button } from "@/components/ui/button";
+import { resolveMediaUrl } from "@/lib/api";
 
 export function CartView() {
   const { items, setQty, remove } = useCart();
@@ -24,7 +26,13 @@ export function CartView() {
           <div className="lg:col-span-2 space-y-3">
             {items.map((i) => (
               <div key={`${i.slug}-${i.variant ?? "default"}`} className="flex gap-4 p-4 rounded-2xl border bg-card">
-                <img src={i.image} alt={i.name} className="h-24 w-24 rounded-xl object-cover bg-surface" />
+                <Image
+                  src={resolveMediaUrl(i.image)}
+                  alt={i.name}
+                  width={96}
+                  height={96}
+                  className="h-24 w-24 rounded-xl object-cover bg-surface"
+                />
                 <div className="flex-1">
                   <div className="font-semibold">{i.name}</div>
                   {i.variant && <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{i.variant}</div>}

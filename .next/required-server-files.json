@@ -67,7 +67,7 @@
       "remotePatterns": [
         {
           "protocol": "https",
-          "hostname": "api.ddaily.co.ke",
+          "hostname": "d-daily-e-commerce-backend.onrender.com",
           "pathname": "/uploads/**"
         },
         {
@@ -123,7 +123,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\Admin\\Desktop\\A.2\\d-daily-frontend",
+    "outputFileTracingRoot": "C:\\Users\\Admin\\Desktop\\d-daily-working\\frontend",
     "experimental": {
       "useSkewCookie": false,
       "cacheLife": {
@@ -313,7 +313,7 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "C:\\Users\\Admin\\Desktop\\A.2\\d-daily-frontend"
+      "root": "C:\\Users\\Admin\\Desktop\\d-daily-working\\frontend"
     },
     "_originalRewrites": {
       "beforeFiles": [],
@@ -321,7 +321,7 @@
       "fallback": []
     }
   },
-  "appDir": "C:\\Users\\Admin\\Desktop\\A.2\\d-daily-frontend",
+  "appDir": "C:\\Users\\Admin\\Desktop\\d-daily-working\\frontend",
   "relativeAppDir": "",
   "files": [
     ".next\\routes-manifest.json",

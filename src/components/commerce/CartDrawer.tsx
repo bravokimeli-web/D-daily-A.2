@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCart, cartTotals } from "@/store/carts";
 import { formatKES } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/api";
 
 export function CartDrawer() {
   const { items, isOpen, setOpen, setQty, remove, clear } = useCart();
@@ -34,7 +36,13 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               {items.map((i) => (
                 <div key={`${i.slug}-${i.variant ?? "default"}`} className="flex gap-3">
-                  <img src={i.image} alt={i.name} className="h-20 w-20 rounded-lg object-cover bg-surface border" />
+                  <Image
+                    src={resolveMediaUrl(i.image)}
+                    alt={i.name}
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-lg object-cover bg-surface border"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm leading-snug line-clamp-2">{i.name}</div>
                     {i.variant && <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-1">{i.variant}</div>}

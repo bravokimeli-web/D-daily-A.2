@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { getApiBaseUrl, resolveMediaUrl } from "@/lib/api";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
@@ -81,10 +82,28 @@ export function AdminView() {
       }
     }, []);
 
+    const loadOrders = useCallback(async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setOrders(data.data || []);
+        } else {
+          setOrders([]);
+        }
+      } catch {
+        setOrders([]);
+      }
+    }, [token]);
+
     useEffect(() => {
       if (!isAdmin) return;
       void loadWebsiteProducts();
-    }, [isAdmin, loadWebsiteProducts]);
+      void loadOrders();
+    }, [isAdmin, loadWebsiteProducts, loadOrders]);
 
     // Fetch resellers on mount and when filter changes
     useEffect(() => {
@@ -99,8 +118,8 @@ export function AdminView() {
           }
 
           const response = await fetch(url.toString(), {
-            headers: { 
-              "Authorization": `Bearer ${token}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
           });
 
@@ -116,7 +135,7 @@ export function AdminView() {
       };
 
       fetchResellers();
-    }, [isAdmin, resellerFilter]);
+    }, [isAdmin, resellerFilter, token]);
 
     const handleResellerStatus = async (resellerId: string, status: "approved" | "rejected", notes?: string) => {
       try {
@@ -513,6 +532,7 @@ export function AdminView() {
                       />
                       <label htmlFor="admin-product-image" className="cursor-pointer block">
                         {imagePreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={imagePreview}
                             alt="Preview"
@@ -629,9 +649,11 @@ export function AdminView() {
                         className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex flex-1 gap-4 min-w-0">
-                          <img
+                          <Image
                             src={resolveMediaUrl(p.image)}
-                            alt=""
+                            alt={p.name}
+                            width={64}
+                            height={64}
                             className="h-16 w-16 shrink-0 rounded-lg object-cover border border-border bg-muted"
                           />
                           <div className="min-w-0">
@@ -766,7 +788,9 @@ export function AdminView() {
                                   </a>
                                   {isImage && (
                                     <a href={href} target="_blank" rel="noopener noreferrer" className="block border-t border-border bg-muted/30">
-                                      <img src={href} alt={label} className="max-h-40 w-full object-contain" />
+                                      <div className="relative h-40 w-full">
+                                        <Image src={href} alt={label} fill className="object-contain" />
+                                      </div>
                                     </a>
                                   )}
                                 </div>
