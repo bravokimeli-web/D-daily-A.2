@@ -3,7 +3,7 @@ const IMG = {
   powder: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/insecticidal-powder_1_qgidhf",
   snake: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Snake-Repellent-powder_rfwym0",
   led: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/100W-High-Brightness-LED-Light_q9qvnx",
-  hex: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hexazinone.jpeg",
+  hex: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hexazinone_jdngkg",
   fly: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/fly-catcher_gbolka",
   wrist: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Mosquito-Repellent-Wristband_wvj0ye",
   solar200w: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/200w_solar_2k_aqvidy",
