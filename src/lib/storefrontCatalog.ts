@@ -96,10 +96,39 @@ async function fetchApiProducts(): Promise<StorefrontCatalog> {
   return { products: mergeStaticAndApiProducts(apiList), apiAvailable };
 }
 
+async function fetchHomepageProducts(): Promise<StorefrontCatalog> {
+  let apiList: Product[] = [];
+  let apiAvailable = false;
+
+  try {
+    const base = getApiBaseUrl();
+    const res = await fetch(`${base}/homepage-products`, {
+      next: { revalidate: REVALIDATE },
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { success?: boolean; data?: ApiProductRow[] };
+      if (json.success && Array.isArray(json.data)) {
+        apiList = json.data.map(mapApiProductToStorefront);
+        apiAvailable = true;
+      }
+    }
+  } catch {
+    /* offline — static catalog still renders */
+  }
+
+  return { products: mergeStaticAndApiProducts(apiList), apiAvailable };
+}
+
 export const getStorefrontProducts = unstable_cache(
   fetchApiProducts,
   ["storefront-catalog"],
   { revalidate: REVALIDATE, tags: ["products"] },
+);
+
+export const getHomepageStorefrontProducts = unstable_cache(
+  fetchHomepageProducts,
+  ["homepage-storefront"],
+  { revalidate: REVALIDATE, tags: ["homepage-products"] },
 );
 
 export async function fetchActiveStorefrontProducts(): Promise<Product[]> {

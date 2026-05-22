@@ -66,6 +66,8 @@ export const productsApi = {
   },
   getBySlug: (slug: string) =>
     request<{ success: boolean; data: Product }>(`/products/${slug}`),
+  getHomepage: () => request<{ success: boolean; data: Product[] }>("/homepage-products"),
+  getCategories: () => request<{ success: boolean; data: string[] }>("/categories"),
 };
 
 // ─── Orders ───────────────────────────────────────────────────────────────────
