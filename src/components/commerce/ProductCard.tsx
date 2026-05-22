@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/ui/product-image";
 import { ShoppingBag } from "lucide-react";
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
 
@@ -19,7 +19,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.04 }}
+      transition={{ duration: 0.35 }}
       className="group relative flex flex-col rounded-2xl bg-card border border-border/60 overflow-hidden hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300"
     >
       <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface no-underline">

@@ -234,8 +234,8 @@ export function ProductView({ product, related }: ProductViewProps) {
         <div className="container-px mx-auto max-w-7xl mt-20">
           <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">You might also like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {related.map((p, i) => (
-              <ProductCard product={p} key={p.slug} index={i} />
+            {related.map((p) => (
+              <ProductCard product={p} key={p.slug} />
             ))}
           </div>
         </div>

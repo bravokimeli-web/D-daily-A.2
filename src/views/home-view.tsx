@@ -92,7 +92,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
           {featured.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-8">No priced products to highlight right now.</p>
           ) : (
-            featured.map((p, i) => <ProductCard product={p} key={p.slug} index={i} />)
+            featured.map((p) => <ProductCard product={p} key={p.slug} />)
           )}
         </div>
       </section>

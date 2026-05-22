@@ -114,8 +114,8 @@ export function ShopView({ initialProducts }: ShopViewProps) {
       )}
 
       <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {filtered.map((p, i) => (
-          <ProductCard product={p} key={p.slug} index={i} />
+        {filtered.map((p) => (
+          <ProductCard product={p} key={p.slug} />
         ))}
       </div>
       {filtered.length === 0 && (
