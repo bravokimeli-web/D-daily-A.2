@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "api.ddaily.co.ke", pathname: "/uploads/**" },
       { protocol: "https", hostname: "d-daily-e-commerce-backend.onrender.com", pathname: "/uploads/**" },
       { protocol: "https", hostname: "www.ddaily.co.ke" },
+    { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
     ],
   },
   async rewrites() {

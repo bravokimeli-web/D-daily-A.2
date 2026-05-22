@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Truck, Smartphone, Sparkles, Star, Leaf, Lightbulb, Home, Settings } from "lucide-react";
 import Image from "next/image";
-import hero from "@/assets/hero-section.png";
+const hero = "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hero-sction_cvgwxl";
 import { categories, type Product } from "@/data/products";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { Button } from "@/components/ui/button";

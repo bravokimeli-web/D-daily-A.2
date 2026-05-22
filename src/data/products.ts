@@ -1,23 +1,19 @@
-import type { StaticImageData } from "next/image";
-import spray from "@/assets/products/insecticide-spray (1).jpeg";
-import powder from "@/assets/products/insecticidal-powder (1).jpeg";
-import snake from "@/assets/products/snake-repellent.jpeg";
-import led from "@/assets/products/led-light-100w.jpeg";
-import hex from "@/assets/products/hexazinone.jpeg";
-import fly from "@/assets/products/fly-catcher.jpeg";
-import wrist from "@/assets/products/mosquito-wristband.jpeg";
-import solar200w from "@/assets/products/200w solar 2k.jpeg";
-import magneticWindow from "@/assets/products/magnetic-window.jpeg";
-import kit4in1 from "@/assets/products/4-1-image.jpeg";
-import kitComplete from "@/assets/products/complete-home-kit.jpeg";
-import kitBeforeAfter from "@/assets/products/be-after-4-1.jpeg";
+const IMG = {
+  spray: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Insecticide-spray_k6fb1l",
+  powder: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/insecticidal-powder_1_qgidhf",
+  snake: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Snake-Repellent-powder_rfwym0",
+  led: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/100W-High-Brightness-LED-Light_q9qvnx",
+  hex: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hexazinone.jpeg",
+  fly: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/fly-catcher_gbolka",
+  wrist: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Mosquito-Repellent-Wristband_wvj0ye",
+  solar200w: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/200w_solar_2k_aqvidy",
+  magneticWindow: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/magnetic-windows-net_aynkbi",
+  kit4in1: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/4-1-kit_nzknir",
+  kitComplete: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/complete-home-kit.jpeg",
+  kitBeforeAfter: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/be-after-4-1.jpeg",
+};
 
 export type Category = "lighting" | "home-protection" | "farm-protection" | "fashion-design";
-
-/** Normalize Next.js static imports to URL strings for API + cart storage. */
-export function assetSrc(img: string | StaticImageData): string {
-  return typeof img === "string" ? img : img.src;
-}
 
 export interface Product {
   slug: string;
@@ -56,7 +52,7 @@ export const products: Product[] = [
     price: 999,
     originalPrice: 1499,
     category: "farm-protection",
-    image: assetSrc(spray),
+    image: IMG.spray,
     tagline: "Fast knockdown for cockroaches, bed bugs, ants & fleas.",
     description:
       "A powerful 500ml ready-to-use insecticide spray engineered for quick action against household pests. Low odor formula, surface-safe, and effective for weeks.",
@@ -83,7 +79,7 @@ export const products: Product[] = [
     price: 80,
     originalPrice: 149,
     category: "farm-protection",
-    image: assetSrc(powder),
+    image: IMG.powder,
     tagline: "Fipronil 0.3% — affordable, effective, single-use sachet.",
     description: "Pocket-sized 8g sachet of insecticidal powder. Place near pest hotspots for long-lasting effect.",
     usage: ["Sprinkle along cracks, corners, and entry points.", "Reapply every 2 weeks for best results."],
@@ -99,7 +95,7 @@ export const products: Product[] = [
     price: 1980,
     originalPrice: 3999,
     category: "home-protection",
-    image: assetSrc(snake),
+    image: IMG.snake,
     variants: [
       { id: "500g", label: "500g", price: 1980, originalPrice: 3999 },
       { id: "1000g", label: "1000g", price: 3599, originalPrice: 7998 },
@@ -121,7 +117,7 @@ export const products: Product[] = [
     price: 1280,
     originalPrice: 1600,
     category: "lighting",
-    image: assetSrc(led),
+    image: IMG.led,
     tagline: "Rechargeable, USB, IP65 — built for night markets & vendors.",
     description:
       "A premium portable 100W LED bulb with built-in lithium battery, hook, USB charging, and waterproof construction.",
@@ -140,7 +136,7 @@ export const products: Product[] = [
     price: 2999,
     originalPrice: 3999,
     category: "farm-protection",
-    image: assetSrc(hex),
+    image: IMG.hex,
     tagline: "Granule formulation, 5% Hexazinone — for weed-free fields.",
     description:
       "Reliable selective herbicide trusted by Kenyan farmers. Targets stubborn weeds with long residual control.",
@@ -157,7 +153,7 @@ export const products: Product[] = [
     price: 169,
     originalPrice: 200,
     category: "home-protection",
-    image: assetSrc(fly),
+    image: IMG.fly,
     tagline: "No baiting, no poisons, no mess — just results.",
     description:
       "Sticky fly catcher roll with super lure. Ideal for kitchens, shops, and farms.",
@@ -173,7 +169,7 @@ export const products: Product[] = [
     price: 599,
     originalPrice: 999,
     category: "home-protection",
-    image: assetSrc(magneticWindow),
+    image: IMG.magneticWindow,
     tagline: "Breathable barrier — keep mosquitoes out, fresh air in.",
     description: "Adhesive-mounted mosquito net for windows. Cuttable to size.",
     usage: ["Clean window frame, attach adhesive strips, press net firmly."],
@@ -186,7 +182,7 @@ export const products: Product[] = [
     price: 2400,
     originalPrice: 2800,
     category: "lighting",
-    image: assetSrc(solar200w),
+    image: IMG.solar200w,
     tagline: "Bright, reliable, eco-friendly — power from the sun.",
     description: "200W solar-powered ceiling light with 12000mAh battery, motion sensor, and remote control. Perfect for homes, farms, and off-grid areas.",
     usage: ["Mount on ceiling with included brackets.", "Charge in direct sunlight for 6-8 hours.", "Use remote control to adjust brightness."],
@@ -205,7 +201,7 @@ export const products: Product[] = [
     price: 199,
     originalPrice: 299,
     category: "home-protection",
-    image: assetSrc(wrist),
+    image: IMG.wrist,
     tagline: "DEET-free wearable protection — great for kids and travel.",
     description: "Comfortable silicone wristband infused with natural repellents. Up to 240 hours per band.",
     usage: ["Wear on wrist or ankle.", "Store in sealed pouch when not in use."],
@@ -218,8 +214,8 @@ export const products: Product[] = [
     price: 3599,
     originalPrice: 6232,
     category: "home-protection",
-    image: assetSrc(kit4in1),
-    images: [assetSrc(kit4in1), assetSrc(kitComplete), assetSrc(kitBeforeAfter)],
+    image: IMG.kit4in1,
+    images: [IMG.kit4in1, IMG.kitComplete, IMG.kitBeforeAfter],
     tagline: "Complete home protection — spray, powder, repellent & traps.",
     description: "Comprehensive pest control kit with insecticidal spray, powder, snake repellent, and fly catchers. Everything you need for a pest-free home.",
     usage: [

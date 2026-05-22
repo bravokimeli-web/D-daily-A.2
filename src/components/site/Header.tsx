@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, ShoppingBag, Search, X } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/logo.jpeg";
+const logo = "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Ddaily-logo_iefzvg";
 import { Button } from "@/components/ui/button";
 import { useCart, cartTotals } from "@/store/carts";
 
