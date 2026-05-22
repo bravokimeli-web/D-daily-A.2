@@ -1,0 +1,20 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/robots.txt/route": "/robots.txt",
+  "/sitemap.xml/route": "/sitemap.xml",
+  "/shop/page": "/shop",
+  "/about/page": "/about",
+  "/admin/page": "/admin",
+  "/categories/page": "/categories",
+  "/checkout/page": "/checkout",
+  "/cart/page": "/cart",
+  "/faq/page": "/faq",
+  "/page": "/",
+  "/privacy/page": "/privacy",
+  "/contact/page": "/contact",
+  "/reseller/page": "/reseller",
+  "/reseller/track/page": "/reseller/track",
+  "/safety/page": "/safety",
+  "/product/[slug]/page": "/product/[slug]",
+  "/terms/page": "/terms"
+}
