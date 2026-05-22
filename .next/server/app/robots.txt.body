@@ -1,7 +1,0 @@
-User-Agent: *
-Allow: /
-Disallow: /admin
-Disallow: /checkout
-
-Host: https://www.ddaily.co.ke
-Sitemap: https://www.ddaily.co.ke/sitemap.xml
