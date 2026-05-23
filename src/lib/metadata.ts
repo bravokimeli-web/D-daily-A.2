@@ -4,7 +4,7 @@ import { absoluteUrl, SITE_URL } from "@/lib/env";
 import { resolveMediaUrl } from "@/lib/api";
 
 export const SITE_NAME = "D-Daily Ltd";
-const DEFAULT_IMAGE = "/assets/hero-section.png";
+const DEFAULT_IMAGE = "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hero-sction_cvgwxl";
 const DEFAULT_TWITTER = "@ddailykenya01";
 
 type PageMetaInput = {
@@ -180,7 +180,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: absoluteUrl("/logo.jpeg"),
+    logo: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Ddaily-logo_iefzvg",
     description:
       "D-Daily Ltd is a Kenyan retailer of pest control, lighting, home protection and farm protection essentials.",
     contactPoint: [
