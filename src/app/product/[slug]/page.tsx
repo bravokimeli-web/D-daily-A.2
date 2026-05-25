@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProductView } from "@/views/product-view";
-import { productMetadata, productJsonLd } from "@/lib/metadata";
+import { productMetadata, productJsonLd, productBreadcrumbJsonLd } from "@/lib/metadata";
 import { getProductPageData, getStorefrontProducts } from "@/lib/storefrontCatalog";
 
 export const revalidate = 300;
@@ -26,7 +26,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const data = await getProductPageData(slug);
   if (!data) notFound();
 
-  const jsonLd = productJsonLd(data.product);
+  const jsonLd = [productJsonLd(data.product), productBreadcrumbJsonLd(data.product)];
 
   return (
     <>

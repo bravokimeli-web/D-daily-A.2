@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { SiteChrome } from "@/components/layout/site-chrome";
-import { organizationJsonLd, SITE_NAME } from "@/lib/metadata";
+import { organizationJsonLd, siteJsonLd, SITE_NAME } from "@/lib/metadata";
 import { SITE_URL, getApiBaseUrl } from "@/lib/env";
 import "./globals.css";
 
@@ -41,9 +41,11 @@ export const metadata: Metadata = {
   publisher: SITE_NAME,
   formatDetection: { telephone: true, email: true },
   icons: {
-    icon: "/logo.jpeg",
-    apple: "/logo.jpeg",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -58,11 +60,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="dns-prefetch" href={apiOrigin} />
         <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="D-Daily Ltd" />
       </head>
       <body className="min-h-screen antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([organizationJsonLd(), siteJsonLd()]),
+          }}
         />
         <AppProviders>
           <SiteChrome>{children}</SiteChrome>

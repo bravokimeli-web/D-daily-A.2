@@ -6,6 +6,7 @@ export const metadata = staticPageMetadata(
   "Complete your D-Daily Ltd order with M-PESA STK push and choose nationwide courier delivery.",
   "/checkout",
   ["checkout", "M-PESA", "delivery", "Kenya"],
+  true,
 );
 
 export default function CheckoutPage() {

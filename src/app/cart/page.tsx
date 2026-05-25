@@ -6,6 +6,7 @@ export const metadata = staticPageMetadata(
   "Review items in your D-Daily Ltd cart and proceed to secure M-PESA checkout with nationwide delivery.",
   "/cart",
   ["cart", "checkout", "Kenya", "M-PESA"],
+  true,
 );
 
 export default function CartPage() {

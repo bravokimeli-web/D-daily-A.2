@@ -86,6 +86,7 @@ export function staticPageMetadata(
   description: string,
   path: string,
   keywords: string[] = [],
+  noIndex = false,
 ): Metadata {
   return buildPageMetadata({
     title: `${title} — ${SITE_NAME}`,
@@ -93,6 +94,7 @@ export function staticPageMetadata(
     path,
     keywords,
     imageAlt: `${title} — ${SITE_NAME}`,
+    noIndex,
   });
 }
 
@@ -174,6 +176,41 @@ export function productJsonLd(product: Product) {
   };
 }
 
+export function productBreadcrumbJsonLd(product: Product) {
+  const path = `/product/${product.slug}`;
+  const categoryPath = `/shop?category=${encodeURIComponent(product.category ?? "")}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Shop",
+        item: absoluteUrl("/shop"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.category ?? "Products",
+        item: absoluteUrl(categoryPath),
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: product.name,
+        item: absoluteUrl(path),
+      },
+    ],
+  };
+}
+
 export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -193,5 +230,79 @@ export function organizationJsonLd() {
       },
     ],
     sameAs: ["https://www.instagram.com/ddailykenya01?igsh=cm5wd3FpbXhoenRu"],
+  };
+}
+
+export function siteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    alternateName: "D-Daily Ltd",
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Ddaily-logo_iefzvg",
+      },
+    },
+  };
+}
+
+export function shopBreadcrumbJsonLd(category?: string) {
+  const list = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: SITE_URL,
+    },
+  ];
+
+  // Shop listing
+  list.push({
+    "@type": "ListItem",
+    position: list.length + 1,
+    name: "Shop",
+    item: absoluteUrl("/shop"),
+  });
+
+  if (category) {
+    const categoryPath = `/shop?category=${encodeURIComponent(category)}`;
+    list.push({
+      "@type": "ListItem",
+      position: list.length + 1,
+      name: category.replace("-", " "),
+      item: absoluteUrl(categoryPath),
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: list,
+  };
+}
+
+export function categoriesBreadcrumbJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Categories",
+        item: absoluteUrl("/categories"),
+      },
+    ],
   };
 }

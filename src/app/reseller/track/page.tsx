@@ -6,6 +6,7 @@ export const metadata = staticPageMetadata(
   "Track your D-Daily reseller application status securely using the email you used when applying.",
   "/reseller/track",
   ["reseller", "track", "application", "status", "D-Daily Ltd"],
+  true,
 );
 
 export default function ResellerTrackPage() {
