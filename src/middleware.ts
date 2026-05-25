@@ -7,6 +7,9 @@ import type { NextRequest } from "next/server";
  */
 export function middleware(req: NextRequest) {
   try {
+    // Only enforce redirects in production deployments. Skip for preview builds.
+    if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") return;
+
     const preferred = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.ddaily.co.ke";
     const preferredUrl = new URL(preferred);
     const preferredHost = preferredUrl.host;
@@ -30,5 +33,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [], // Disabled temporarily for Vercel deployment testing
+  matcher: ["/((?!_next/static|_next/image|api|favicon.ico).*)"],
 };
