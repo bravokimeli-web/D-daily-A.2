@@ -124,6 +124,29 @@ export function AdminView() {
       }
     };
 
+    const deleteOrder = async (orderNumber: string) => {
+      if (!token) {
+        toast.error("Admin authentication required.");
+        return;
+      }
+
+      const confirmed = window.confirm("Delete this pending order? This cannot be undone.");
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/orders/${encodeURIComponent(orderNumber)}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to delete order");
+        toast.success(data.message || "Order deleted successfully");
+        await loadOrders();
+      } catch (err) {
+        toast.error((err as Error).message || "Failed to delete order");
+      }
+    };
+
     const loadDashboardStats = useCallback(async () => {
       if (!token) return;
       try {
@@ -791,13 +814,23 @@ export function AdminView() {
                         ) : null}
                         <div className="flex flex-wrap gap-2 pt-2">
                           {order.status === "pending_payment" && order.customer?.email && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => sendOrderEmailAction(order.orderNumber, "payment-reminder")}
-                            >
-                              Send payment reminder
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => sendOrderEmailAction(order.orderNumber, "payment-reminder")}
+                              >
+                                Send payment reminder
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteOrder(order.orderNumber)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete order
+                              </Button>
+                            </>
                           )}
                           {(order.status === "paid" || order.status === "processing" || order.status === "shipped") && order.customer?.email && (
                             <Button
