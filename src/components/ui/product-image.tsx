@@ -29,7 +29,12 @@ export function ProductImage({ src, alt, className, sizes, priority, variants }:
   if (!isOptimizable(displaySrc)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={displaySrc} alt={alt} className={cn("object-cover", className)} loading={priority ? "eager" : "lazy"} />
+      <img
+        src={displaySrc}
+        alt={alt}
+        className={cn("object-cover transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
+        loading={priority ? "eager" : "lazy"}
+      />
     );
   }
 
@@ -40,7 +45,7 @@ export function ProductImage({ src, alt, className, sizes, priority, variants }:
       src={displaySrc}
       alt={alt}
       fill
-      className={cn("object-cover", className)}
+      className={cn("object-cover transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
       sizes={sizes ?? "(max-width: 640px) 100vw, 50vw"}
       priority={priority}
       unoptimized={unoptimized}

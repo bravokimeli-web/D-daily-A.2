@@ -113,7 +113,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
               <div key={c.id}>
                 <Link
                   href={`/shop?category=${c.id}`}
-                  className="group block p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/40 hover:shadow-soft transition-all h-full"
+                  className="group block p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/40 hover:shadow-soft transition-all h-full isolate transform-gpu will-change-[transform] backface-visibility-[hidden]"
                 >
                   <div className="h-11 w-11 rounded-xl bg-primary-soft text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Icon className="h-5 w-5" />
