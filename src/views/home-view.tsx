@@ -128,7 +128,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
       </section>
 
       <section className="container-px mx-auto max-w-7xl py-20">
-        <div className="rounded-3xl bg-primary text-primary-foreground p-10 md:p-16">
+        <div className="rounded-3xl bg-primary text-primary-foreground p-10 md:p-16 isolate transform-gpu will-change-[transform] backface-visibility-[hidden]">
           <div className="max-w-2xl">
             <h2 className="font-display text-3xl md:text-4xl font-bold">Why D-Daily</h2>
             <p className="mt-3 text-primary-foreground/80">A small list of promises we never break.</p>
@@ -164,7 +164,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
           <div className="hidden md:block text-sm font-semibold text-primary">4.9/5 average rating</div>
         </div>
         <div className="overflow-hidden md:overflow-visible">
-          <div className="flex gap-4 overflow-x-auto px-2 pb-2 md:grid md:grid-cols-3 md:gap-6 md:px-0 md:overflow-visible snap-x snap-mandatory md:snap-none">
+          <div className="flex gap-4 overflow-x-auto px-2 pb-2 md:grid md:grid-cols-3 md:gap-6 md:px-0 md:overflow-visible snap-x snap-mandatory md:snap-none transform-gpu will-change-[transform]">
             {[
               {
                 name: "Amina N.",
@@ -184,7 +184,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             ].map((review) => (
               <div
                 key={review.name}
-                className="snap-start min-w-[80%] sm:min-w-[60%] md:min-w-0 rounded-3xl border border-border/70 bg-card p-5 shadow-sm"
+                className="snap-start min-w-[80%] sm:min-w-[60%] md:min-w-0 rounded-3xl border border-border/70 bg-card p-5 shadow-sm isolate transform-gpu will-change-[transform] backface-visibility-[hidden]"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary font-semibold">
@@ -223,8 +223,13 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {["Mosquito prevention", "Safe herbicide use", "Snake-aware homes", "Indoor pest control"].map((t) => (
-              <div key={t} className="p-5 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-colors">
+            {[
+              "Mosquito prevention",
+              "Safe herbicide use",
+              "Snake-aware homes",
+              "Indoor pest control",
+            ].map((t) => (
+              <div key={t} className="p-5 rounded-2xl border border-border/60 bg-card hover:border-primary/40 transition-colors isolate transform-gpu will-change-[transform] backface-visibility-[hidden]">
                 <Leaf className="h-5 w-5 text-primary" />
                 <div className="mt-3 font-semibold text-sm">{t}</div>
               </div>
