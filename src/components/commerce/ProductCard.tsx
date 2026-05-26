@@ -65,6 +65,6 @@ export function ProductCard({ product }: { product: Product }) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
