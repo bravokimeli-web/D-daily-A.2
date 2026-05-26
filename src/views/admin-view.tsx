@@ -59,6 +59,8 @@ export function AdminView() {
     const [products, setProducts] = useState<any[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
     const [orders, setOrders] = useState<any[]>([]);
+    const [orderFilter, setOrderFilter] = useState<"all" | "pending_payment" | "paid">("pending_payment");
+    const [dashboardStats, setDashboardStats] = useState<any | null>(null);
     const [resellers, setResellers] = useState<any[]>([]);
     const [loadingResellers, setLoadingResellers] = useState(false);
     const [resellerFilter, setResellerFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
@@ -85,7 +87,12 @@ export function AdminView() {
     const loadOrders = useCallback(async () => {
       if (!token) return;
       try {
-        const response = await fetch(`${getApiBaseUrl()}/admin/orders`, {
+        const url = new URL(`${getApiBaseUrl()}/admin/orders`);
+        if (orderFilter !== "all") {
+          url.searchParams.append("status", orderFilter);
+        }
+
+        const response = await fetch(url.toString(), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
@@ -97,13 +104,31 @@ export function AdminView() {
       } catch {
         setOrders([]);
       }
+    }, [token, orderFilter]);
+
+    const loadDashboardStats = useCallback(async () => {
+      if (!token) return;
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setDashboardStats(data.data || null);
+        } else {
+          setDashboardStats(null);
+        }
+      } catch {
+        setDashboardStats(null);
+      }
     }, [token]);
 
     useEffect(() => {
       if (!isAdmin) return;
       void loadWebsiteProducts();
       void loadOrders();
-    }, [isAdmin, loadWebsiteProducts, loadOrders]);
+      void loadDashboardStats();
+    }, [isAdmin, loadWebsiteProducts, loadOrders, loadDashboardStats]);
 
     // Fetch resellers on mount and when filter changes
     useEffect(() => {
@@ -412,7 +437,11 @@ export function AdminView() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
-                    <p className="mt-2 text-3xl font-bold text-foreground">{orders.length}</p>
+                    <p className="mt-2 text-3xl font-bold text-foreground">{dashboardStats?.orders?.total ?? orders.length}</p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <span>Paid: {dashboardStats?.orders?.paid ?? "—"}</span>
+                      <span>Pending: {dashboardStats?.orders?.pending ?? "—"}</span>
+                    </div>
                   </div>
                   <ShoppingCart className="h-8 w-8 text-primary" />
                 </div>
@@ -684,6 +713,26 @@ export function AdminView() {
           {activeTab === "orders" && (
             <div>
               <h2 className="text-xl font-bold text-foreground mb-4">Orders</h2>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {([
+                  { key: "all", label: "All orders" },
+                  { key: "pending_payment", label: "Pending payments" },
+                  { key: "paid", label: "Paid orders" },
+                ] as const).map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => setOrderFilter(filter.key)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      orderFilter === filter.key
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-card text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
               {orders.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-12 text-center">
                   <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -692,10 +741,25 @@ export function AdminView() {
               ) : (
                 <div className="space-y-2">
                   {orders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 rounded-lg border border-border bg-card">
-                      <div className="flex-1">
-                        <p className="font-medium">Order #{order.id}</p>
-                        <p className="text-sm text-muted-foreground">{order.date}</p>
+                    <div key={order._id ?? order.id} className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-card sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <p className="font-medium">Order #{order.orderNumber ?? order.id}</p>
+                          <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                            order.status === "paid"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : order.status === "pending_payment"
+                              ? "bg-yellow-100 text-yellow-900"
+                              : "bg-slate-100 text-slate-800"
+                          }`}>
+                            {order.status?.replace("_", " ") ?? "Unknown"}
+                          </span>
+                        </div>
+                        <div className="grid gap-1 sm:grid-cols-3">
+                          <p className="text-sm text-muted-foreground">Created: {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}</p>
+                          <p className="text-sm text-muted-foreground">Total: KES {order.total?.toLocaleString()}</p>
+                          <p className="text-sm text-muted-foreground">Customer: {order.customer?.name ?? order.customer?.phone ?? "—"}</p>
+                        </div>
                       </div>
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />

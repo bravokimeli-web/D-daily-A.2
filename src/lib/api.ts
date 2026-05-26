@@ -83,7 +83,7 @@ export interface OrderItem {
 export interface CreateOrderPayload {
   customer: {
     name: string;
-    phone: string;
+    phone?: string;
     email?: string;
     city: string;
     address: string;

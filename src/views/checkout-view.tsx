@@ -14,13 +14,12 @@ export function CheckoutView() {
   const [courier, setCourier] = useState("Swatin");
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
-  const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim());
+  const hasRequiredInfo = Boolean(name.trim() && city.trim() && address.trim());
   const canSubmit = items.length > 0 && hasRequiredInfo;
 
   const place = async (e: FormEvent<HTMLFormElement>) => {
@@ -33,7 +32,7 @@ export function CheckoutView() {
     setLoading(true);
     try {
       const res = await ordersApi.create({
-        customer: { name, phone, email: email || undefined, city, address },
+        customer: { name, email: email || undefined, city, address },
         items: items.map((i) => ({ slug: i.slug, name: i.name, price: i.price, qty: i.qty, image: i.image })),
         courier,
       });
@@ -62,16 +61,6 @@ export function CheckoutView() {
               aria-invalid={attemptedSubmit && !name}
             />
             <Field
-              id="checkout-phone"
-              label="Phone number"
-              required
-              type="tel"
-              placeholder="07xx xxx xxx"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              aria-invalid={attemptedSubmit && !phone}
-            />
-            <Field
               id="checkout-email"
               label="Email"
               type="email"
@@ -79,6 +68,9 @@ export function CheckoutView() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <p className="text-sm text-muted-foreground">
+              Phone is optional. Paystack will prompt for any required number during payment.
+            </p>
           </Section>
           <Section title="Delivery">
             <Field
@@ -115,12 +107,27 @@ export function CheckoutView() {
             </div>
           </Section>
           <Section title="Payment">
-            <div className="p-4 rounded-2xl border bg-primary-soft/40 flex items-start gap-3">
-              <Smartphone className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <div className="font-semibold">Secure Paystack payment</div>
-                <p className="text-sm text-muted-foreground">After placing the order, you'll be redirected to Paystack to complete your payment.</p>
+            <div className="p-4 rounded-2xl border bg-primary-soft/40 flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <Smartphone className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <div className="font-semibold">Secure Paystack payment</div>
+                  <p className="text-sm text-muted-foreground">After placing the order, you'll be redirected to Paystack to complete your payment.</p>
+                </div>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  toast(
+                    "Your order will be saved as pending while you complete payment. If you cancel the Paystack prompt, return here and try again.",
+                    { duration: 8000 }
+                  )
+                }
+              >
+                Payment help
+              </Button>
             </div>
           </Section>
         </div>
