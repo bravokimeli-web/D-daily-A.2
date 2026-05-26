@@ -146,8 +146,11 @@ export function CheckoutView() {
             <span>{formatKES(subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Delivery ({courier})</span>
-            <span>At checkout</span>
+            <span className="text-muted-foreground">Preferred courier</span>
+            <span>{courier}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Delivery cost is paid directly to the courier on confirmation and is not included in this total.
           </div>
           <div className="border-t pt-3 flex justify-between font-bold">
             <span>Total</span>
