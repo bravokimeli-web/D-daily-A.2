@@ -758,8 +758,19 @@ export function AdminView() {
                         <div className="grid gap-1 sm:grid-cols-3">
                           <p className="text-sm text-muted-foreground">Created: {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}</p>
                           <p className="text-sm text-muted-foreground">Total: KES {order.total?.toLocaleString()}</p>
-                          <p className="text-sm text-muted-foreground">Customer: {order.customer?.name ?? order.customer?.phone ?? "—"}</p>
+                          <p className="text-sm text-muted-foreground">Location: {order.customer?.city ?? "—"}</p>
                         </div>
+                        <div className="grid gap-1 sm:grid-cols-2">
+                          <p className="text-sm text-muted-foreground">Customer: {order.customer?.name ?? "—"}</p>
+                          {order.customer?.email ? (
+                            <p className="text-sm text-muted-foreground">Email: {order.customer.email}</p>
+                          ) : null}
+                        </div>
+                        {order.items?.length ? (
+                          <p className="text-sm text-muted-foreground truncate">
+                            Ordering: {order.items.map((item: any) => `${item.name}×${item.qty}`).join(", ")}
+                          </p>
+                        ) : null}
                       </div>
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
