@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type { Product } from "@/data/products";
 import { formatKES } from "@/data/products";
 import { resolveMediaUrl } from "@/lib/api";
@@ -15,14 +14,9 @@ export function ProductCard({ product }: { product: Product }) {
   const imageSrc = resolveMediaUrl(String(product.image));
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.35 }}
-      className="group relative flex flex-col rounded-2xl bg-card border border-border/60 overflow-hidden hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300"
-    >
-      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface no-underline">
+    <div className="group relative flex min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
+
+      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface no-underline isolate">
         <ProductImage
           src={imageSrc}
           alt={`${product.name} - ${product.tagline || product.category}`}
@@ -36,7 +30,7 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         )}
       </Link>
-      <div className="flex-1 p-4 flex flex-col gap-2">
+      <div className="flex-1 min-h-0 p-4 flex flex-col gap-2">
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           <span className="rounded-full bg-muted px-2 py-1">{product.category.replace("-", " ")}</span>
         </div>

@@ -113,7 +113,7 @@ export function ShopView({ initialProducts }: ShopViewProps) {
         </div>
       )}
 
-      <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+      <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 auto-rows-fr">
         {filtered.map((p) => (
           <ProductCard product={p} key={p.slug} />
         ))}

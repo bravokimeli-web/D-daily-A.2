@@ -88,7 +88,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             View all →
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
           {featured.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-8">No priced products to highlight right now.</p>
           ) : (
