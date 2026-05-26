@@ -130,7 +130,7 @@ export function ResellerView() {
             <div className="mt-8 grid sm:grid-cols-3 gap-3">
               {[
                 { icon: TrendingUp, t: "Up to 25%", d: "commission" },
-                { icon: Wallet, t: "Weekly", d: "M-PESA payouts" },
+              { icon: Wallet, t: "Weekly", d: "mobile payouts" },
                 { icon: Users, t: "Referral", d: "rewards" },
               ].map((f) => (
                 <div key={f.d} className="rounded-2xl border bg-card p-4">
@@ -146,7 +146,7 @@ export function ResellerView() {
             <h2 className="font-display text-2xl font-bold">Apply now</h2>
             <Field label="Full name" name="full_name" required />
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Phone (M-PESA)" name="phone" type="tel" required />
+              <Field label="Phone number" name="phone" type="tel" required />
               <Field label="Email" name="email" type="email" required />
             </div>
             <FileField label="ID front" onChange={(f) => setFiles((s) => ({ ...s, id_front: f }))} />

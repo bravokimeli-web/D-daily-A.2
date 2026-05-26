@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    "Premium pest control, lighting, home protection, and farm protection essentials. Fast delivery across Kenya with M-PESA payments.",
+    "Premium pest control, lighting, home protection, and farm protection essentials. Fast delivery across Kenya with secure Paystack checkout.",
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,

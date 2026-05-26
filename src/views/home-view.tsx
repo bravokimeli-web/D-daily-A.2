@@ -43,7 +43,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             </h1>
             <p className="mt-5 text-base md:text-lg text-gray-200 max-w-xl leading-relaxed">
               Trusted lighting, home and farm protection essentials — curated for Kenyan homes, farms and businesses. Fast
-              delivery. M-PESA ready.
+              delivery. Easy online payment.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" className="rounded-full h-12 px-7 text-base">
@@ -70,7 +70,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
                 <Truck className="h-4 w-4 text-primary" /> Nationwide delivery
               </div>
               <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-primary" /> M-PESA payments
+                <Smartphone className="h-4 w-4 text-primary" /> Easy payment
               </div>
             </div>
           </div>
@@ -137,7 +137,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             {[
               { icon: ShieldCheck, t: "Trusted products", d: "Sourced and tested for Kenyan conditions." },
               { icon: Truck, t: "Fast delivery", d: "Swatin, Bolt, G4S & Fargo nationwide." },
-              { icon: Smartphone, t: "M-PESA ready", d: "Pay safely from your phone in seconds." },
+              { icon: Smartphone, t: "Easy checkout", d: "Pay safely from your phone or browser in seconds." },
               { icon: Star, t: "Real support", d: "WhatsApp our team — we actually reply." },
             ].map((f) => (
               <div key={f.t}>

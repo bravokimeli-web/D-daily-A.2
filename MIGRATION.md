@@ -11,7 +11,7 @@ Migration complete. Legacy Vite/TanStack Router files have been removed. Run `np
 | All routes (`/`, `/shop`, `/product/:slug`, cart, checkout, admin, reseller, etc.) | App Router |
 | Zustand cart + persist | Unchanged |
 | Paystack redirect on checkout | `ordersApi.create` → `authorizationUrl` |
-| M-PESA checkout form + couriers | `CheckoutView` |
+| Online payment checkout form + couriers | `CheckoutView` |
 | Admin login + dashboard + products/resellers | `AdminView` |
 | Reseller apply + track | `ResellerView` / `ResellerTrackView` |
 | API catalog + static fallback | `mergeStaticAndApiProducts` + offline banner |

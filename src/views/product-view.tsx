@@ -189,7 +189,7 @@ export function ProductView({ product, related }: ProductViewProps) {
             {[
               { icon: Truck, t: "Nationwide" },
               { icon: ShieldCheck, t: "Quality assured" },
-              { icon: Smartphone, t: "M-PESA" },
+              { icon: Smartphone, t: "Easy payment" },
             ].map((b) => (
               <div key={b.t} className="p-3 rounded-xl bg-surface border border-border/60 text-center">
                 <b.icon className="h-4 w-4 mx-auto text-primary" />

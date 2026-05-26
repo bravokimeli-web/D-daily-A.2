@@ -63,7 +63,7 @@ export function CheckoutView() {
             />
             <Field
               id="checkout-phone"
-              label="Phone (M-PESA)"
+              label="Phone number"
               required
               type="tel"
               placeholder="07xx xxx xxx"
@@ -118,8 +118,8 @@ export function CheckoutView() {
             <div className="p-4 rounded-2xl border bg-primary-soft/40 flex items-start gap-3">
               <Smartphone className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <div className="font-semibold">M-PESA STK Push</div>
-                <p className="text-sm text-muted-foreground">After placing the order, you'll receive a payment prompt on your phone.</p>
+                <div className="font-semibold">Secure Paystack payment</div>
+                <p className="text-sm text-muted-foreground">After placing the order, you'll be redirected to Paystack to complete your payment.</p>
               </div>
             </div>
           </Section>
