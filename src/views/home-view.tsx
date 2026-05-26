@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Truck, Smartphone, Sparkles, Star, Leaf, Lightbulb, Home, Settings } from "lucide-react";
 import Image from "next/image";
 const hero = "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/hero-sction_cvgwxl";
@@ -88,7 +87,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
             View all →
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 items-stretch auto-rows-fr">
           {featured.length === 0 ? (
             <p className="col-span-full text-center text-muted-foreground py-8">No priced products to highlight right now.</p>
           ) : (
@@ -108,16 +107,10 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.map((c, i) => {
+          {categories.map((c) => {
             const Icon = catIcons[c.id];
             return (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-              >
+              <div key={c.id}>
                 <Link
                   href={`/shop?category=${c.id}`}
                   className="group block p-6 rounded-2xl bg-card border border-border/60 hover:border-primary/40 hover:shadow-soft transition-all h-full"
@@ -128,7 +121,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
                   <div className="font-display font-bold text-lg">{c.name}</div>
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{c.description}</p>
                 </Link>
-              </motion.div>
+              </div>
             );
           })}
         </div>

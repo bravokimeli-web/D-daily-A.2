@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
   const imageSrc = resolveMediaUrl(String(product.image));
 
   return (
-    <div className="group relative flex min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
+    <div className="group relative flex h-full min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
 
       <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface no-underline isolate">
         <ProductImage
