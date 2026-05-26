@@ -793,7 +793,7 @@ export function AdminView() {
                           {order.status === "pending_payment" && order.customer?.email && (
                             <Button
                               size="sm"
-                              variant="secondary"
+                              variant="default"
                               onClick={() => sendOrderEmailAction(order.orderNumber, "payment-reminder")}
                             >
                               Send payment reminder
