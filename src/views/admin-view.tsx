@@ -106,6 +106,24 @@ export function AdminView() {
       }
     }, [token, orderFilter]);
 
+    const sendOrderEmailAction = async (orderNumber: string, action: "payment-reminder" | "shipped" | "delivered") => {
+      if (!token) {
+        toast.error("Admin authentication required.");
+        return;
+      }
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/orders/${encodeURIComponent(orderNumber)}/email/${action}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Failed to send email");
+        toast.success(data.message || "Email sent successfully");
+      } catch (err) {
+        toast.error((err as Error).message || "Failed to send email");
+      }
+    };
+
     const loadDashboardStats = useCallback(async () => {
       if (!token) return;
       try {
@@ -771,6 +789,38 @@ export function AdminView() {
                             Ordering: {order.items.map((item: any) => `${item.name}×${item.qty}`).join(", ")}
                           </p>
                         ) : null}
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {order.status === "pending_payment" && order.customer?.email && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => sendOrderEmailAction(order.orderNumber, "payment-reminder")}
+                            >
+                              Send payment reminder
+                            </Button>
+                          )}
+                          {(order.status === "paid" || order.status === "processing" || order.status === "shipped") && order.customer?.email && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => sendOrderEmailAction(order.orderNumber, "shipped")}
+                            >
+                              Send shipped notice
+                            </Button>
+                          )}
+                          {(order.status === "paid" || order.status === "processing" || order.status === "shipped" || order.status === "delivered") && order.customer?.email && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => sendOrderEmailAction(order.orderNumber, "delivered")}
+                            >
+                              Send delivered reminder
+                            </Button>
+                          )}
+                          {!order.customer?.email && (
+                            <span className="text-xs text-muted-foreground">No customer email available for email actions.</span>
+                          )}
+                        </div>
                       </div>
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
