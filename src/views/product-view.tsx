@@ -29,7 +29,12 @@ export function ProductView({ product, related }: ProductViewProps) {
   const currentCartQty = cartItem?.qty ?? 0;
   const totalPrice = (selectedVariant?.price ?? product.price ?? 0) * qty;
 
-  const containSlugs = new Set(["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"]);
+  const containSlugs = new Set([
+    "mosquito-window-net",
+    "solar-ceiling-light-200w",
+    "led-light-100w",
+    "4-in-1-home-pest-control-kit",
+  ]);
   const fitForProduct: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
 
   const primaryImage = resolveMediaUrl(String(product.image));

@@ -12,7 +12,12 @@ import { ShoppingBag } from "lucide-react";
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
-  const containSlugs = new Set(["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"]);
+  const containSlugs = new Set([
+    "mosquito-window-net",
+    "solar-ceiling-light-200w",
+    "led-light-100w",
+    "4-in-1-home-pest-control-kit",
+  ]);
   const fit: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
 
   return (
