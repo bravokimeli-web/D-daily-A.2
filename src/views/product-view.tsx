@@ -49,9 +49,14 @@ export function ProductView({ product, related }: ProductViewProps) {
   const displayPrice = selectedVariant?.price ?? product.price;
   const displayOriginalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
   const selectedVariantLabel = selectedVariant?.label;
+  const hasVariantStockInfo = Array.isArray(product.variants) && product.variants.some((v) => v.stock !== undefined);
+  const selectedVariantStock = selectedVariant?.stock;
+  const isVariantSoldOut = hasVariantStockInfo && (selectedVariantStock ?? 0) <= 0;
+  const isProductSoldOut = !product.variants && (product as any).stock !== undefined && Number((product as any).stock) <= 0;
+  const isSoldOut = isVariantSoldOut || isProductSoldOut;
 
   const handleAdd = () => {
-    if (!displayPrice) return;
+    if (!displayPrice || isSoldOut) return;
     add(
       {
         slug: product.slug,
@@ -138,6 +143,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                   key={variant.id}
                   type="button"
                   onClick={() => setSelectedVariantId(variant.id)}
+                  disabled={hasVariantStockInfo && (variant.stock ?? 0) <= 0}
                   className={`rounded-full border px-4 py-2 text-sm transition ${
                     selectedVariantId === variant.id
                       ? "border-primary bg-primary text-primary-foreground"
@@ -145,6 +151,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                   }`}
                 >
                   {variant.label}
+                  {hasVariantStockInfo && (variant.stock ?? 0) <= 0 ? " (Sold out)" : ""}
                 </button>
               ))}
             </div>
@@ -190,8 +197,9 @@ export function ProductView({ product, related }: ProductViewProps) {
                 className="flex-1 rounded-full h-12 hidden md:inline-flex"
                 onClick={handleAdd}
                 aria-label={`Add ${qty} ${product.name} to cart`}
+                disabled={isSoldOut}
               >
-                Add {qty} to cart
+                {isSoldOut ? "Sold out" : `Add ${qty} to cart`}
               </Button>
             </div>
           )}
@@ -280,8 +288,8 @@ export function ProductView({ product, related }: ProductViewProps) {
                 <div className="text-xs text-muted-foreground">Total</div>
                 <div className="font-bold">{formatKES(totalPrice)}</div>
               </div>
-              <Button className="flex-1 rounded-full h-11" onClick={handleAdd} aria-label={`Add ${qty} items to cart`}>
-                Add to cart
+              <Button className="flex-1 rounded-full h-11" onClick={handleAdd} aria-label={`Add ${qty} items to cart`} disabled={isSoldOut}>
+                {isSoldOut ? "Sold out" : "Add to cart"}
               </Button>
             </div>
           )}

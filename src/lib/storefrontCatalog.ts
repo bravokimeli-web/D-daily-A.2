@@ -49,7 +49,7 @@ export type ApiProductRow = {
   originalPrice?: number;
   images?: string[];
   video?: string;
-  variants?: { id: string; label: string; price: number; originalPrice?: number }[];
+  variants?: { id: string; label: string; price: number; originalPrice?: number; stock?: number }[];
   imageVariants?: Product["imageVariants"];
 };
 

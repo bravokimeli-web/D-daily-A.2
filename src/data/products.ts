@@ -30,7 +30,7 @@ export interface Product {
     original?: string;
     webp?: string;
   };
-  variants?: { id: string; label: string; price: number; originalPrice?: number }[];
+  variants?: { id: string; label: string; price: number; originalPrice?: number; stock?: number }[];
   tagline: string;
   description: string;
   usage: string[];
@@ -216,7 +216,6 @@ export const products: Product[] = [
     originalPrice: 6232,
     category: "home-protection",
     image: IMG.kit4in1,
-    images: [IMG.kit4in1, IMG.kitComplete, IMG.kitBeforeAfter],
     tagline: "Complete home protection — spray, powder, repellent & traps.",
     description: "Comprehensive pest control kit with insecticidal spray, powder, snake repellent, and fly catchers. Everything you need for a pest-free home.",
     usage: [

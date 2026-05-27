@@ -12,6 +12,7 @@ import { ShoppingBag } from "lucide-react";
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
+  const isSoldOut = (product as any).stock !== undefined && Number((product as any).stock) <= 0;
   const containSlugs = new Set([
     "mosquito-window-net",
     "solar-ceiling-light-200w",
@@ -59,7 +60,7 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-sm text-muted-foreground">Coming soon</span>
             )}
           </div>
-          {product.price && (
+          {product.price && !isSoldOut && (
             <Button
               type="button"
               size="icon"
@@ -71,6 +72,7 @@ export function ProductCard({ product }: { product: Product }) {
               <ShoppingBag className="h-4 w-4" />
             </Button>
           )}
+          {isSoldOut && <span className="text-xs font-semibold text-amber-700">Sold out</span>}
         </div>
       </div>
     </div>

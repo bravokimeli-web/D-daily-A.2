@@ -54,7 +54,7 @@ export interface Product {
   specs: { label: string; value: string }[];
   badge?: string;
   stock: number;
-  variants?: { id: string; label: string; price: number; originalPrice?: number }[];
+  variants?: { id: string; label: string; price: number; originalPrice?: number; stock?: number }[];
   isActive: boolean;
 }
 

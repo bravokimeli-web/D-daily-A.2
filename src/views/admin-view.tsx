@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getApiBaseUrl, resolveMediaUrl } from "@/lib/api";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { Button } from "@/components/ui/button";
+import { products as staticCatalogProducts } from "@/data/products";
 import { useState, useEffect, useCallback } from "react";
 import { BarChart3, LogOut, Package, ShoppingCart, Users, Settings, Trash2, Eye, FileText, CheckCircle, XCircle, ExternalLink, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -42,20 +43,23 @@ function parseSpecLines(raw: FormDataEntryValue | null | undefined): { label: st
 
 function parseVariantLines(
   raw: FormDataEntryValue | null | undefined
-): { id: string; label: string; price: number; originalPrice?: number }[] {
-  const out: { id: string; label: string; price: number; originalPrice?: number }[] = [];
+): { id: string; label: string; price: number; originalPrice?: number; stock?: number }[] {
+  const out: { id: string; label: string; price: number; originalPrice?: number; stock?: number }[] = [];
   for (const line of linesToArray(raw)) {
-    const [labelRaw, priceRaw, originalRaw] = line.split("|").map((part) => part.trim());
+    const [labelRaw, priceRaw, originalRaw, stockRaw] = line.split("|").map((part) => part.trim());
     if (!labelRaw || !priceRaw) continue;
     const price = Number(priceRaw);
     if (!Number.isFinite(price) || price < 0) continue;
     const originalPrice = originalRaw ? Number(originalRaw) : undefined;
+    const stock = stockRaw ? Number(stockRaw) : undefined;
+    const stockValue = typeof stock === "number" && Number.isFinite(stock) ? Math.max(0, Math.floor(stock)) : undefined;
     const id = labelRaw.toLowerCase().replace(/\s+/g, "-");
     out.push({
       id,
       label: labelRaw,
       price,
       originalPrice: Number.isFinite(originalPrice) ? originalPrice : undefined,
+      stock: stockValue,
     });
   }
   return out;
@@ -89,6 +93,7 @@ export function AdminView() {
     const [mediaPreviews, setMediaPreviews] = useState<Array<{ type: "image" | "video"; url: string }>>([]);
     const [dropActive, setDropActive] = useState(false);
     const [editingSlug, setEditingSlug] = useState<string | null>(null);
+    const [dbProductSlugs, setDbProductSlugs] = useState<Set<string>>(new Set());
 
     const loadWebsiteProducts = useCallback(async () => {
       setLoadingProducts(true);
@@ -96,11 +101,19 @@ export function AdminView() {
         const response = await fetch(`${getApiBaseUrl()}/products?active=true`);
         if (!response.ok) throw new Error("Failed to fetch products");
         const data = await response.json();
-        setProducts(data.data || []);
+        const apiProducts = Array.isArray(data.data) ? data.data : [];
+        const apiMap = new Map<string, any>(apiProducts.map((p: any) => [p.slug, { ...p, _fromDb: true }]));
+        const merged = staticCatalogProducts.map((p) => apiMap.get(p.slug) ?? { ...p, _fromDb: false });
+        for (const p of apiProducts) {
+          if (!merged.some((item) => item.slug === p.slug)) merged.push({ ...p, _fromDb: true });
+        }
+        setDbProductSlugs(new Set(apiProducts.map((p: any) => p.slug)));
+        setProducts(merged);
       } catch (err) {
         console.error(err);
         toast.error("Failed to load products from the server");
-        setProducts([]);
+        setDbProductSlugs(new Set());
+        setProducts(staticCatalogProducts.map((p) => ({ ...p, _fromDb: false })));
       } finally {
         setLoadingProducts(false);
       }
@@ -443,12 +456,14 @@ export function AdminView() {
 
       try {
         const isEditing = Boolean(editingSlug);
+        const isExistingDbProduct = editingSlug ? dbProductSlugs.has(editingSlug) : false;
+        const shouldUpdate = isEditing && isExistingDbProduct;
         const response = await fetch(
-          isEditing
+          shouldUpdate
             ? `${getApiBaseUrl()}/admin/products/${encodeURIComponent(editingSlug as string)}`
             : `${getApiBaseUrl()}/admin/products`,
           {
-          method: isEditing ? "PUT" : "POST",
+          method: shouldUpdate ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
@@ -457,10 +472,10 @@ export function AdminView() {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          toast.error(typeof data.message === "string" ? data.message : `Failed to ${isEditing ? "update" : "create"} product`);
+          toast.error(typeof data.message === "string" ? data.message : `Failed to ${shouldUpdate ? "update" : "create"} product`);
           return;
         }
-        toast.success(isEditing ? "Product updated" : "Product created");
+        toast.success(shouldUpdate ? "Product updated" : "Product published");
         (e.target as HTMLFormElement).reset();
         resetLocalMedia();
         setEditingSlug(null);
@@ -477,7 +492,9 @@ export function AdminView() {
       resetLocalMedia();
       const specs = Array.isArray(product.specs) ? product.specs.map((s: any) => `${s.label} | ${s.value}`).join("\n") : "";
       const variants = Array.isArray(product.variants)
-        ? product.variants.map((v: any) => `${v.label} | ${v.price}${v.originalPrice ? ` | ${v.originalPrice}` : ""}`).join("\n")
+        ? product.variants
+            .map((v: any) => `${v.label} | ${v.price}${v.originalPrice ? ` | ${v.originalPrice}` : ""}${v.stock !== undefined ? ` | ${v.stock}` : ""}`)
+            .join("\n")
         : "";
       const imageUrls = Array.isArray(product.images) ? product.images.join("\n") : "";
       const fields: Array<[string, string]> = [
@@ -511,6 +528,10 @@ export function AdminView() {
     };
 
     const handleDeleteProductImage = async (product: any, imageUrl: string) => {
+      if (!dbProductSlugs.has(product.slug)) {
+        toast.error("Publish this product first, then manage its images.");
+        return;
+      }
       const currentImages = getProductImageList(product);
       if (currentImages.length <= 1) {
         toast.error("A product must keep at least one image.");
@@ -556,6 +577,29 @@ export function AdminView() {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.message || "Failed to remove product");
         toast.success("Product removed from the site");
+        await loadWebsiteProducts();
+      } catch (err) {
+        toast.error((err as Error).message);
+      }
+    };
+
+    const handleSetProductStock = async (product: any, stock: number) => {
+      if (!dbProductSlugs.has(product.slug)) {
+        toast.error("Publish this product first, then update stock.");
+        return;
+      }
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/products/${encodeURIComponent(product.slug)}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({ stock: Math.max(0, Math.floor(stock)) }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "Failed to update stock");
+        toast.success("Stock updated");
         await loadWebsiteProducts();
       } catch (err) {
         toast.error((err as Error).message);
@@ -910,11 +954,11 @@ export function AdminView() {
                   <div>
                     <label className="text-sm font-medium">Variants (sizes/options)</label>
                     <p className="text-xs text-muted-foreground mt-0.5 mb-1">
-                      One per line: <span className="font-mono">Size/Label | Price | Original Price(optional)</span>
+                      One per line: <span className="font-mono">Size/Label | Price | Original Price(optional) | Stock(optional)</span>
                     </p>
                     <textarea
                       name="variants"
-                      placeholder={"e.g.\nSize 40 | 2500 | 3000\nSize 41 | 2500 | 3000"}
+                      placeholder={"e.g.\nSize 40 | 2500 | 3000 | 5\nSize 41 | 2500 | 3000 | 0"}
                       rows={4}
                       className="mt-1 w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-sm"
                     />
@@ -943,9 +987,9 @@ export function AdminView() {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-foreground mb-2">Live on website</h2>
+                <h2 className="text-xl font-bold text-foreground mb-2">Catalog products</h2>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Active products returned by the API (same source the storefront can use).
+                  Built-in and database products. Edit any item and click save to publish/update it in the database.
                 </p>
                 {loadingProducts ? (
                   <p className="text-muted-foreground">Loading products…</p>
@@ -955,6 +999,7 @@ export function AdminView() {
                   <div className="space-y-3">
                     {products.map((p) => {
                       const imageList = getProductImageList(p);
+                      const isFromDb = dbProductSlugs.has(p.slug);
                       return (
                       <div
                         key={p._id || p.slug}
@@ -975,6 +1020,9 @@ export function AdminView() {
                               {p.category} · KES {p.price ?? "—"}{p.originalPrice ? ` · was KES ${p.originalPrice}` : ""} · stock {p.stock ?? 0}
                             </p>
                             <p className="text-xs text-muted-foreground font-mono truncate">{p.slug}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {isFromDb ? "Source: Database" : "Source: Built-in (not yet published to DB)"}
+                            </p>
                           </div>
                         </div>
                           <div className="inline-flex shrink-0 items-center gap-2">
@@ -984,15 +1032,32 @@ export function AdminView() {
                               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                             >
                               <Pencil className="h-4 w-4" />
-                              Edit
+                              {isFromDb ? "Edit" : "Edit & publish"}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleDeleteProduct(p.slug)}
+                              disabled={!isFromDb}
                               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Remove from site
+                              {isFromDb ? "Remove from site" : "Publish first"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetProductStock(p, 0)}
+                              disabled={!isFromDb}
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                            >
+                              Mark sold out
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSetProductStock(p, Math.max(1, Number(p.stock) || 1))}
+                              disabled={!isFromDb}
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-emerald-300 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                            >
+                              Mark in stock
                             </button>
                           </div>
                         </div>
@@ -1013,6 +1078,7 @@ export function AdminView() {
                                 <button
                                   type="button"
                                   onClick={() => handleDeleteProductImage(p, img)}
+                                  disabled={!isFromDb}
                                   className="absolute -top-2 -right-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow hover:opacity-90"
                                   aria-label={`Delete image ${index + 1} for ${p.name}`}
                                   title="Delete this image"

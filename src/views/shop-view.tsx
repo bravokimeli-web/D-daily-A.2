@@ -43,6 +43,10 @@ export function ShopView({ initialProducts }: ShopViewProps) {
   }, [initialProducts, cat, q, searchQ]);
 
   const isFashionDesign = cat === "fashion-design";
+  const fashionProductsCount = useMemo(
+    () => initialProducts.filter((p) => p.category === "fashion-design").length,
+    [initialProducts]
+  );
   const query = q.trim() || searchQ;
 
   return (
@@ -52,7 +56,9 @@ export function ShopView({ initialProducts }: ShopViewProps) {
         <h1 className="mt-2 font-display text-4xl md:text-5xl font-bold">{isFashionDesign ? "Fashion & Design" : "All products"}</h1>
         <p className="mt-3 text-muted-foreground">
           {isFashionDesign
-            ? "Stylish products are arriving soon — stay tuned for our new fashion collection."
+            ? fashionProductsCount > 0
+              ? "Discover our latest fashion and design products."
+              : "Stylish products are arriving soon — stay tuned for our new fashion collection."
             : "Premium essentials, ready to ship across Kenya."}
         </p>
       </header>
@@ -102,7 +108,7 @@ export function ShopView({ initialProducts }: ShopViewProps) {
         )}
       </div>
 
-      {isFashionDesign && (
+      {isFashionDesign && fashionProductsCount === 0 && (
         <div className="mt-10 rounded-3xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
           <p className="text-sm uppercase tracking-[0.32em] text-primary">Fashion & Design</p>
           <h2 className="mt-4 text-3xl font-semibold">Something stylish is coming soon</h2>
