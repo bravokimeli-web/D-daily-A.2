@@ -427,13 +427,15 @@ export function AdminView() {
         return;
       }
 
-      const slug =
+      const generatedSlug =
         name
           .toLowerCase()
           .replace(/\s+/g, "-")
           .replace(/[^a-z0-9-]/g, "")
           .replace(/-+/g, "-")
           .replace(/^-|-$/g, "") || `product-${Date.now()}`;
+      // Keep the original slug when editing so we update the same product record.
+      const slug = editingSlug || generatedSlug;
 
       const payload = {
         slug,
