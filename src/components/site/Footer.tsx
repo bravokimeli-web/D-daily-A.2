@@ -19,6 +19,7 @@ export function Footer() {
             <li><Link href="/shop" className="hover:text-primary transition-colors no-underline">All products</Link></li>
             <li><Link href="/categories" className="hover:text-primary transition-colors no-underline">Categories</Link></li>
             <li><Link href="/reseller" className="hover:text-primary transition-colors no-underline">Become a reseller</Link></li>
+            <li><Link href="/track-order" className="hover:text-primary transition-colors no-underline">Track order</Link></li>
             <li><Link href="/reseller/track" className="hover:text-primary transition-colors no-underline">Track reseller application</Link></li>
           </ul>
         </div>
@@ -34,7 +35,7 @@ export function Footer() {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Reach us</div>
           <ul className="space-y-2.5 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-primary"/>Physical store: Embakasi, Nairobi, Kenya</li>
+            <li className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 text-primary"/>Physical store: Garden City, Nairobi, Kenya</li>
             <li className="flex items-start gap-2"><Phone className="h-4 w-4 mt-0.5 text-primary"/>+254 106555333</li>
             <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5 text-primary"/>ddailykenya01@gmail.com</li>
             <li className="flex items-start gap-2">

@@ -14,7 +14,7 @@ export default function AboutPage() {
       <h1 className="mt-2 font-display text-4xl md:text-5xl font-bold">Built for Kenyan homes & farms.</h1>
       <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
         D-Daily Ltd is a Kenyan company on a mission to make trusted home and farm protection accessible to everyone. Our
-        physical store is in <strong className="text-foreground">Embakasi</strong>, Nairobi. From there to the dukas of Nairobi
+        physical store is in <strong className="text-foreground">Garden City</strong>, Nairobi. From there to the dukas of Nairobi
         and farms across Rift Valley, we deliver products that work — and education on how to use them safely.
       </p>
       <div className="mt-10 grid sm:grid-cols-3 gap-4">

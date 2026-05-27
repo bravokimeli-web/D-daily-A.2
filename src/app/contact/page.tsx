@@ -26,7 +26,7 @@ export default function ContactPage() {
           </li>
           <li className="flex items-center gap-3">
             <MapPin className="h-5 w-5 text-primary" />
-            Physical store — Embakasi, Nairobi, Kenya
+            Physical store — Garden City, Nairobi, Kenya
           </li>
           <li className="flex items-center gap-3">
             <MessageCircle className="h-5 w-5 text-primary" />
