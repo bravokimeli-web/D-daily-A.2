@@ -294,7 +294,7 @@ export function ProductView({ product, related }: ProductViewProps) {
       {related.length > 0 && (
         <div className="container-px mx-auto max-w-7xl mt-20">
           <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">You might also like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
             {related.map((p) => (
               <ProductCard product={p} key={p.slug} />
             ))}
