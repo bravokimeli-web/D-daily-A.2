@@ -405,7 +405,14 @@ export function AdminView() {
             });
             const uj = await up.json().catch(() => ({}));
             if (!up.ok) {
-              toast.error(typeof uj.message === "string" ? uj.message : "Media upload failed");
+              const fallback = `Media upload failed (${up.status} ${up.statusText || "error"})`;
+              toast.error(typeof uj.message === "string" ? uj.message : fallback);
+              console.error("Product media upload failed", {
+                status: up.status,
+                statusText: up.statusText,
+                response: uj,
+                file: { name: mediaFile.name, type: mediaFile.type, size: mediaFile.size },
+              });
               return;
             }
             const uploadedUrl = uj.data?.url as string | undefined;
