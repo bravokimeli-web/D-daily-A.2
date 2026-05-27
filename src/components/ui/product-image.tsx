@@ -20,7 +20,7 @@ type ProductImageProps = {
 };
 
 function isOptimizable(src: string) {
-  return src.startsWith("/") || src.startsWith("https://");
+  return src.startsWith("/") || src.startsWith("https://") || src.startsWith("http://");
 }
 
 export function ProductImage({ src, alt, className, sizes, priority, fit = "cover", variants }: ProductImageProps) {
@@ -35,7 +35,7 @@ export function ProductImage({ src, alt, className, sizes, priority, fit = "cove
       <img
         src={displaySrc}
         alt={alt}
-        className={cn(baseFitClass, "transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
+        className={cn(baseFitClass, "absolute inset-0 h-full w-full transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
         loading={priority ? "eager" : "lazy"}
       />
     );
