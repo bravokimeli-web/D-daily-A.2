@@ -3,7 +3,7 @@ import { ProductView } from "@/views/product-view";
 import { productMetadata, productJsonLd, productBreadcrumbJsonLd } from "@/lib/metadata";
 import { getProductPageData, getStorefrontProducts } from "@/lib/storefrontCatalog";
 
-export const revalidate = 300;
+export const revalidate = 0;
 
 export async function generateStaticParams() {
   const { products } = await getStorefrontProducts();

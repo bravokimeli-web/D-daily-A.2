@@ -1,9 +1,6 @@
-import { unstable_cache } from "next/cache";
 import type { Product, Category } from "@/data/products";
 import { products as staticCatalogProducts, getProduct } from "@/data/products";
 import { getApiBaseUrl } from "@/lib/env";
-
-const REVALIDATE = Number(process.env.NEXT_PUBLIC_REVALIDATE_SECONDS ?? 300);
 
 /**
  * Built-in catalog (data/products.ts) plus live API products.
@@ -84,9 +81,7 @@ async function fetchApiProducts(): Promise<StorefrontCatalog> {
   let apiAvailable = false;
   try {
     const base = getApiBaseUrl();
-    const res = await fetch(`${base}/products?active=true`, {
-      next: { revalidate: REVALIDATE },
-    });
+    const res = await fetch(`${base}/products?active=true`, { cache: "no-store" });
     if (res.ok) {
       const json = (await res.json()) as { data?: ApiProductRow[] };
       apiList = (json.data ?? []).map(mapApiProductToStorefront);
@@ -104,9 +99,7 @@ async function fetchHomepageProducts(): Promise<StorefrontCatalog> {
 
   try {
     const base = getApiBaseUrl();
-    const res = await fetch(`${base}/homepage-products`, {
-      next: { revalidate: REVALIDATE },
-    });
+    const res = await fetch(`${base}/homepage-products`, { cache: "no-store" });
     if (res.ok) {
       const json = (await res.json()) as { success?: boolean; data?: ApiProductRow[] };
       if (json.success && Array.isArray(json.data)) {
@@ -121,17 +114,13 @@ async function fetchHomepageProducts(): Promise<StorefrontCatalog> {
   return { products: mergeStaticAndApiProducts(apiList), apiAvailable };
 }
 
-export const getStorefrontProducts = unstable_cache(
-  fetchApiProducts,
-  ["storefront-catalog"],
-  { revalidate: REVALIDATE, tags: ["products"] },
-);
+export async function getStorefrontProducts(): Promise<StorefrontCatalog> {
+  return fetchApiProducts();
+}
 
-export const getHomepageStorefrontProducts = unstable_cache(
-  fetchHomepageProducts,
-  ["homepage-storefront"],
-  { revalidate: REVALIDATE, tags: ["homepage-products"] },
-);
+export async function getHomepageStorefrontProducts(): Promise<StorefrontCatalog> {
+  return fetchHomepageProducts();
+}
 
 export async function fetchActiveStorefrontProducts(): Promise<Product[]> {
   const catalog = await fetchStorefrontCatalog();
@@ -147,9 +136,7 @@ export async function fetchStorefrontCatalog(): Promise<StorefrontCatalog> {
 
 export async function fetchStorefrontProductOrStatic(slug: string): Promise<Product | null> {
   try {
-    const res = await fetch(`${getApiBaseUrl()}/products/${encodeURIComponent(slug)}`, {
-      next: { revalidate: REVALIDATE },
-    });
+    const res = await fetch(`${getApiBaseUrl()}/products/${encodeURIComponent(slug)}`, { cache: "no-store" });
     if (res.ok) {
       const json = (await res.json()) as { success?: boolean; data?: ApiProductRow };
       if (json.success && json.data) return mapApiProductToStorefront(json.data);
