@@ -97,9 +97,9 @@ export const products: Product[] = [
     category: "home-protection",
     image: IMG.snake,
     variants: [
-      { id: "500g", label: "500g", price: 1980, originalPrice: 3999 },
+      { id: "500g", label: "500g", price: 2399, originalPrice: 3999 },
       { id: "1000g", label: "1000g", price: 3599, originalPrice: 7998 },
-      { id: "1500g", label: "1500g", price: 5299, originalPrice: 11997 },
+      { id: "1500g", label: "1500g", price: 5699, originalPrice: 11997 },
     ],
     tagline: "Single product with size variants for every property.",
     description:

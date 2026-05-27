@@ -58,6 +58,10 @@ export function ProductView({ product, related }: ProductViewProps) {
     });
   };
 
+  const imageFit = ["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"].includes(product.slug)
+    ? "contain"
+    : undefined;
+
   return (
     <div className="pb-32 md:pb-12">
       <div className="container-px mx-auto max-w-7xl py-6 text-sm text-muted-foreground flex items-center gap-1.5">
@@ -81,8 +85,9 @@ export function ProductView({ product, related }: ProductViewProps) {
               variants={product.imageVariants}
               priority={selectedImage === 0}
               sizes="(max-width: 1024px) 100vw, 50vw"
+              objectFit={imageFit}
+              objectPosition={imageFit ? "center" : undefined}
             />
-          </div>
           {allImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
               {allImages.map((image, index) => (
