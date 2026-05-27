@@ -298,6 +298,20 @@ export function AdminView() {
       setMediaPreviews([]);
     };
 
+    const removeMediaAt = (index: number) => {
+      setMediaPreviews((prev) => {
+        const item = prev[index];
+        if (item?.url?.startsWith("blob:")) URL.revokeObjectURL(item.url);
+        return prev.filter((_, i) => i !== index);
+      });
+      setMediaFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const removeLastMedia = () => {
+      if (mediaPreviews.length === 0) return;
+      removeMediaAt(mediaPreviews.length - 1);
+    };
+
     const handleMediaSelected = (files: FileList | null) => {
       if (!files || files.length === 0) return;
       const accepted = Array.from(files).filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
@@ -746,19 +760,37 @@ export function AdminView() {
                       <label htmlFor="admin-product-image" className="cursor-pointer block">
                         {mediaPreviews.length > 0 ? (
                           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                            {mediaPreviews.map((preview, index) =>
-                              preview.type === "video" ? (
-                                <video key={`${preview.url}-${index}`} src={preview.url} controls className="h-28 w-full rounded-xl border border-border object-cover" />
-                              ) : (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  key={`${preview.url}-${index}`}
-                                  src={preview.url}
-                                  alt={`Preview ${index + 1}`}
-                                  className="h-28 w-full rounded-xl object-cover border border-border"
-                                />
-                              )
-                            )}
+                            {mediaPreviews.map((preview, index) => (
+                              <div key={`${preview.url}-${index}`} className="relative">
+                                {preview.type === "video" ? (
+                                  <video
+                                    src={preview.url}
+                                    controls
+                                    className="h-28 w-full rounded-xl border border-border object-cover"
+                                  />
+                                ) : (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={preview.url}
+                                    alt={`Preview ${index + 1}`}
+                                    className="h-28 w-full rounded-xl object-cover border border-border"
+                                  />
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(ev) => {
+                                    ev.preventDefault();
+                                    ev.stopPropagation();
+                                    removeMediaAt(index);
+                                  }}
+                                  className="absolute -top-2 -right-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-background border border-border text-destructive shadow hover:bg-destructive/10"
+                                  aria-label={`Remove selected media ${index + 1}`}
+                                  title="Remove this selection"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         ) : (
                           <div className="space-y-2 text-sm text-muted-foreground">
@@ -769,13 +801,19 @@ export function AdminView() {
                         )}
                       </label>
                       {mediaPreviews.length > 0 && (
-                        <button
-                          type="button"
-                          className="mt-3 text-xs font-medium text-destructive hover:underline"
-                          onClick={resetLocalMedia}
-                        >
-                          Remove selected media
-                        </button>
+                        <div className="mt-3 flex items-center gap-3">
+                          <button
+                            type="button"
+                            className="text-xs font-medium text-destructive hover:underline"
+                            onClick={removeLastMedia}
+                          >
+                            Undo last
+                          </button>
+                          <span className="text-muted-foreground">|</span>
+                          <button type="button" className="text-xs font-medium text-destructive hover:underline" onClick={resetLocalMedia}>
+                            Clear all
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
