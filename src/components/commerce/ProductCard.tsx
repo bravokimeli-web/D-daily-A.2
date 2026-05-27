@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/ui/product-image";
 import { ShoppingBag } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
@@ -27,13 +29,22 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative flex h-full min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate transform-gpu will-change-[transform] backface-visibility-[hidden] hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
 
-      <Link href={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-surface no-underline isolate">
+      <Link
+        href={`/product/${product.slug}`}
+        className={cn(
+          "relative block aspect-square overflow-hidden no-underline isolate transition-colors duration-300",
+          fit === "contain" ? "bg-white dark:bg-zinc-900" : "bg-surface"
+        )}
+      >
         <ProductImage
           src={imageSrc}
           alt={`${product.name} - ${product.tagline || product.category}`}
           variants={product.imageVariants}
           fit={fit}
-          className="h-full w-full group-hover:scale-105 transition-transform duration-500"
+          className={cn(
+            "h-full w-full group-hover:scale-105 transition-transform duration-500",
+            fit === "contain" ? "p-3 sm:p-4" : ""
+          )}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         {product.badge && (

@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/commerce/ProductCard";
 import { ProductImage } from "@/components/ui/product-image";
 import { toast } from "sonner";
 import { resolveMediaUrl } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type ProductViewProps = {
   product: Product;
@@ -98,7 +99,10 @@ export function ProductView({ product, related }: ProductViewProps) {
         <div className="space-y-4">
           {/* Gallery: fixed aspect frame, touch/swipe support and mobile arrows */}
           <div
-            className="aspect-square rounded-3xl bg-surface overflow-hidden relative"
+            className={cn(
+              "aspect-square rounded-3xl overflow-hidden relative transition-colors duration-300",
+              fitForProduct === "contain" ? "bg-white dark:bg-zinc-900" : "bg-surface"
+            )}
             onTouchStart={(e) => {
               (touchStartX.current as any) = e.touches[0]?.clientX ?? null;
             }}
@@ -125,6 +129,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                 variants={product.imageVariants}
                 fit={fitForProduct}
                 priority={selectedMedia === 0}
+                className={cn(fitForProduct === "contain" ? "p-4 sm:p-6 md:p-8" : "")}
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             )}
@@ -158,14 +163,22 @@ export function ProductView({ product, related }: ProductViewProps) {
                   key={index}
                   type="button"
                   onClick={() => setSelectedMedia(index)}
-                  className={`relative flex-shrink-0 min-w-[64px] w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50"
-                  }`}
+                  className={cn(
+                    "relative flex-shrink-0 min-w-[64px] w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300",
+                    selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50",
+                    fitForProduct === "contain" ? "bg-white dark:bg-zinc-900" : "bg-surface"
+                  )}
                 >
                   {item.type === "video" ? (
                     <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-medium">Video</div>
                   ) : (
-                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" fit={fitForProduct} />
+                    <ProductImage
+                      src={item.src}
+                      alt={`${product.name} ${index + 1}`}
+                      sizes="80px"
+                      fit={fitForProduct}
+                      className={cn(fitForProduct === "contain" ? "p-1.5" : "")}
+                    />
                   )}
                 </button>
               ))}
