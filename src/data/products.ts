@@ -150,7 +150,7 @@ export const products: Product[] = [
   {
     slug: "automatic-fly-catcher",
     name: "Automatic Fly Catcher",
-    price: 169,
+    price: 1,
     originalPrice: 200,
     category: "home-protection",
     image: IMG.fly,
