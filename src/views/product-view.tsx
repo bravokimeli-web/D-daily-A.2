@@ -30,8 +30,8 @@ export function ProductView({ product, related }: ProductViewProps) {
   const totalPrice = (selectedVariant?.price ?? product.price ?? 0) * qty;
 
   const primaryImage = resolveMediaUrl(String(product.image));
-  const allImagesRaw = product.images && product.images.length > 0 ? product.images : [product.image];
-  const allImages = allImagesRaw.map((img) => resolveMediaUrl(String(img)));
+  const allImagesRaw = [product.image, ...(Array.isArray(product.images) ? product.images : [])];
+  const allImages = [...new Set(allImagesRaw.map((img) => resolveMediaUrl(String(img))).filter(Boolean))];
   const mediaItems: Array<{ type: "image" | "video"; src: string }> = [
     ...allImages.map((src) => ({ type: "image" as const, src })),
     ...(product.video ? [{ type: "video" as const, src: resolveMediaUrl(product.video) }] : []),

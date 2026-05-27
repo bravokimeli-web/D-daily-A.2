@@ -489,6 +489,49 @@ export function AdminView() {
       form.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
+    const getProductImageList = (product: any): string[] => {
+      const urls = [product?.image, ...(Array.isArray(product?.images) ? product.images : [])]
+        .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+        .map((value) => value.trim());
+      return [...new Set(urls)];
+    };
+
+    const handleDeleteProductImage = async (product: any, imageUrl: string) => {
+      const currentImages = getProductImageList(product);
+      if (currentImages.length <= 1) {
+        toast.error("A product must keep at least one image.");
+        return;
+      }
+
+      if (!window.confirm("Delete this image from the product?")) return;
+
+      const nextImages = currentImages.filter((url) => url !== imageUrl);
+      if (nextImages.length === 0) {
+        toast.error("A product must keep at least one image.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/admin/products/${encodeURIComponent(product.slug)}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            image: nextImages[0],
+            images: nextImages.slice(1),
+          }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "Failed to delete image");
+        toast.success("Image deleted");
+        await loadWebsiteProducts();
+      } catch (err) {
+        toast.error((err as Error).message);
+      }
+    };
+
     const handleDeleteProduct = async (slug: string) => {
       if (!window.confirm("Remove this product from the website? It will be hidden from shoppers.")) return;
       try {
@@ -872,12 +915,15 @@ export function AdminView() {
                   <p className="text-muted-foreground">No active products in the database.</p>
                 ) : (
                   <div className="space-y-3">
-                    {products.map((p) => (
+                    {products.map((p) => {
+                      const imageList = getProductImageList(p);
+                      return (
                       <div
                         key={p._id || p.slug}
-                        className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4"
                       >
-                        <div className="flex flex-1 gap-4 min-w-0">
+                        <div className="flex flex-1 gap-4 min-w-0 sm:items-center sm:justify-between sm:flex-row flex-col">
+                          <div className="flex gap-4 min-w-0">
                           <Image
                             src={resolveMediaUrl(p.image)}
                             alt={p.name}
@@ -893,26 +939,55 @@ export function AdminView() {
                             <p className="text-xs text-muted-foreground font-mono truncate">{p.slug}</p>
                           </div>
                         </div>
-                        <div className="inline-flex shrink-0 items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleEditProduct(p)}
-                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProduct(p.slug)}
-                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Remove from site
-                          </button>
+                          <div className="inline-flex shrink-0 items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEditProduct(p)}
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProduct(p.slug)}
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove from site
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Product images ({imageList.length}) — click trash to delete one image
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {imageList.map((img, index) => (
+                              <div key={`${p.slug}-${img}-${index}`} className="relative">
+                                <Image
+                                  src={resolveMediaUrl(img)}
+                                  alt={`${p.name} ${index + 1}`}
+                                  width={72}
+                                  height={72}
+                                  className="h-18 w-18 rounded-md object-cover border border-border bg-muted"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProductImage(p, img)}
+                                  className="absolute -top-2 -right-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow hover:opacity-90"
+                                  aria-label={`Delete image ${index + 1} for ${p.name}`}
+                                  title="Delete this image"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </div>
