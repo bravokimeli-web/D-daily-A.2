@@ -34,6 +34,9 @@ export function ProductView({ product, related }: ProductViewProps) {
     "mosquito-window-net",
     "solar-ceiling-light-200w",
     "led-light-100w",
+    "snake-repellent-powder",
+    "insecticidal-spray",
+    "automatic-fly-catcher",
     "4-in-1-home-pest-control-kit",
   ]);
   const fitForProduct: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
