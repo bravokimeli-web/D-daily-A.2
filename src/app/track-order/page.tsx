@@ -5,14 +5,6 @@ import { useState, FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ordersApi } from "@/lib/api";
-import { staticPageMetadata } from "@/lib/metadata";
-
-export const metadata = staticPageMetadata(
-  "Track order",
-  "Track your D-Daily Ltd order by order number and see its current status.",
-  "/track-order",
-  ["track order", "order status", "D-Daily Ltd", "checkout"],
-);
 
 interface OrderCustomer {
   name?: string;
