@@ -100,9 +100,14 @@ export function ProductView({ product, related }: ProductViewProps) {
 
       <div className="container-px mx-auto max-w-7xl grid lg:grid-cols-2 gap-10 lg:gap-16">
         <div className="space-y-4">
-          <div className="aspect-square rounded-3xl bg-surface overflow-hidden relative">
+          <div className="aspect-[4/3] md:aspect-square max-h-[65vh] rounded-3xl bg-surface overflow-hidden relative">
             {selected?.type === "video" ? (
-              <video src={selected.src} controls className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`} />
+              <video
+                src={selected.src}
+                controls
+                className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`}
+                style={{ minHeight: 0 }}
+              />
             ) : (
               <ProductImage
                 src={selected?.src ?? allImages[0]}
