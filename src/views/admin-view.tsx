@@ -327,7 +327,11 @@ export function AdminView() {
 
     const handleMediaSelected = (files: FileList | null) => {
       if (!files || files.length === 0) return;
-      const accepted = Array.from(files).filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
+      const accepted = Array.from(files).filter((file) => {
+        const mime = (file.type || "").toLowerCase();
+        if (mime.startsWith("image/") || mime.startsWith("video/")) return true;
+        return /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|mp4|webm|mov|m4v|avi)$/i.test(file.name || "");
+      });
       if (accepted.length === 0) {
         toast.error("Please choose image or video files.");
         return;
@@ -337,7 +341,9 @@ export function AdminView() {
       setMediaPreviews([
         ...mediaPreviews,
         ...accepted.map((file) => ({
-          type: file.type.startsWith("video/") ? ("video" as const) : ("image" as const),
+          type: file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|avi)$/i.test(file.name || "")
+            ? ("video" as const)
+            : ("image" as const),
           url: URL.createObjectURL(file),
         })),
       ]);
@@ -798,7 +804,7 @@ export function AdminView() {
                       <input
                         id="admin-product-image"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                        accept="image/*,video/*,.heic,.heif,.avif,.m4v,.avi"
                         multiple
                         className="hidden"
                         onChange={(ev) => handleMediaSelected(ev.target.files)}
