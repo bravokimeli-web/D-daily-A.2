@@ -5,7 +5,7 @@ import { useState } from "react";
 import { formatKES, type Product } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/carts";
-import { Truck, ShieldCheck, Smartphone, Minus, Plus, ChevronRight } from "lucide-react";
+import { Truck, ShieldCheck, Smartphone, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { ProductImage } from "@/components/ui/product-image";
 import { toast } from "sonner";
@@ -45,6 +45,14 @@ export function ProductView({ product, related }: ProductViewProps) {
     ...(product.video ? [{ type: "video" as const, src: resolveMediaUrl(product.video) }] : []),
   ];
   const selected = mediaItems[selectedMedia] ?? mediaItems[0];
+
+  const handlePrevMedia = () => {
+    setSelectedMedia((current) => (current - 1 + mediaItems.length) % mediaItems.length);
+  };
+
+  const handleNextMedia = () => {
+    setSelectedMedia((current) => (current + 1) % mediaItems.length);
+  };
 
   const displayPrice = selectedVariant?.price ?? product.price;
   const displayOriginalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
@@ -104,6 +112,29 @@ export function ProductView({ product, related }: ProductViewProps) {
                 priority={selectedMedia === 0}
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
+            )}
+            {mediaItems.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrevMedia}
+                  aria-label="Previous media"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMedia}
+                  aria-label="Next media"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-[11px] text-white">
+                  {selectedMedia + 1}/{mediaItems.length}
+                </span>
+              </>
             )}
           </div>
           {mediaItems.length > 1 && (

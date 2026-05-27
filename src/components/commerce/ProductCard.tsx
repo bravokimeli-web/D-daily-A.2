@@ -1,24 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type MouseEvent } from "react";
 import type { Product } from "@/data/products";
 import { formatKES } from "@/data/products";
 import { resolveMediaUrl } from "@/lib/api";
 import { useCart } from "@/store/carts";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/ui/product-image";
-import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
 export function ProductCard({ product }: { product: Product }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const add = useCart((s) => s.add);
-  const images = useMemo(
-    () => [product.image, ...(Array.isArray(product.images) ? product.images : [])].filter(Boolean),
-    [product.image, product.images]
-  );
-  const imageCount = images.length;
-  const imageSrc = resolveMediaUrl(String(images[currentIndex] ?? product.image));
+  const imageSrc = resolveMediaUrl(String(product.image));
   const isSoldOut = (product as any).stock !== undefined && Number((product as any).stock) <= 0;
   const containSlugs = new Set([
     "mosquito-window-net",
@@ -27,19 +20,6 @@ export function ProductCard({ product }: { product: Product }) {
     "4-in-1-home-pest-control-kit",
   ]);
   const fit: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
-
-  const showCarousel = imageCount > 1;
-  const handlePrevImage = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setCurrentIndex((currentIndex) => (currentIndex - 1 + imageCount) % imageCount);
-  };
-
-  const handleNextImage = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setCurrentIndex((currentIndex) => (currentIndex + 1) % imageCount);
-  };
 
   return (
     <div className="group relative flex h-full min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate transform-gpu will-change-[transform] backface-visibility-[hidden] hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
@@ -53,31 +33,6 @@ export function ProductCard({ product }: { product: Product }) {
           className="h-full w-full group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
-        {showCarousel && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-2">
-            <button
-              type="button"
-              onClick={handlePrevImage}
-              aria-label={`Previous image of ${product.name}`}
-              className="pointer-events-auto rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNextImage}
-              aria-label={`Next image of ${product.name}`}
-              className="pointer-events-auto rounded-full bg-black/40 p-2 text-white transition hover:bg-black/60"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-        {showCarousel && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-[11px] text-white">
-            {currentIndex + 1}/{imageCount}
-          </span>
-        )}
         {product.badge && (
           <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider">
             {product.badge}
