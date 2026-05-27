@@ -35,8 +35,13 @@ export function ProductImage({ src, alt, className, sizes, priority, fit = "cove
       <img
         src={displaySrc}
         alt={alt}
-        className={cn(baseFitClass, "transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
+        className={cn(
+          baseFitClass,
+          "h-full w-full transform-gpu will-change-[transform] backface-visibility-[hidden]",
+          className,
+        )}
         loading={priority ? "eager" : "lazy"}
+        style={{ width: "100%", height: "100%" }}
       />
     );
   }

@@ -92,9 +92,14 @@ export function ProductView({ product, related }: ProductViewProps) {
 
       <div className="container-px mx-auto max-w-7xl grid lg:grid-cols-2 gap-10 lg:gap-16">
         <div className="space-y-4">
-          <div className="aspect-square rounded-3xl bg-surface overflow-hidden relative">
+          <div className="relative w-full overflow-hidden rounded-3xl bg-surface max-h-[65vh] aspect-[4/3] md:aspect-square">
             {selected?.type === "video" ? (
-              <video src={selected.src} controls className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`} />
+              <video
+                src={selected.src}
+                controls
+                className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`}
+                style={{ minHeight: 0 }}
+              />
             ) : (
               <ProductImage
                 src={selected?.src ?? allImages[0]}
@@ -102,7 +107,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                 variants={product.imageVariants}
                 fit={fitForProduct}
                 priority={selectedMedia === 0}
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             )}
           </div>
@@ -113,14 +118,20 @@ export function ProductView({ product, related }: ProductViewProps) {
                   key={index}
                   type="button"
                   onClick={() => setSelectedMedia(index)}
-                  className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`relative flex-shrink-0 min-w-[80px] h-20 w-20 rounded-lg overflow-hidden border-2 transition-colors ${
                     selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50"
                   }`}
                 >
                   {item.type === "video" ? (
                     <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-medium">Video</div>
                   ) : (
-                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" fit={fitForProduct} />
+                    <ProductImage
+                      src={item.src}
+                      alt={`${product.name} ${index + 1}`}
+                      sizes="80px"
+                      fit={fitForProduct}
+                      className="h-full w-full"
+                    />
                   )}
                 </button>
               ))}
