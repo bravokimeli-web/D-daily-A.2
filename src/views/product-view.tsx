@@ -29,6 +29,9 @@ export function ProductView({ product, related }: ProductViewProps) {
   const currentCartQty = cartItem?.qty ?? 0;
   const totalPrice = (selectedVariant?.price ?? product.price ?? 0) * qty;
 
+  const containSlugs = new Set(["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"]);
+  const fitForProduct: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
+
   const primaryImage = resolveMediaUrl(String(product.image));
   const allImagesRaw = [product.image, ...(Array.isArray(product.images) ? product.images : [])];
   const allImages = [...new Set(allImagesRaw.map((img) => resolveMediaUrl(String(img))).filter(Boolean))];
@@ -81,12 +84,13 @@ export function ProductView({ product, related }: ProductViewProps) {
         <div className="space-y-4">
           <div className="aspect-square rounded-3xl bg-surface overflow-hidden relative">
             {selected?.type === "video" ? (
-              <video src={selected.src} controls className="h-full w-full object-cover" />
+              <video src={selected.src} controls className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`} />
             ) : (
               <ProductImage
                 src={selected?.src ?? allImages[0]}
                 alt={product.name}
                 variants={product.imageVariants}
+                fit={fitForProduct}
                 priority={selectedMedia === 0}
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
@@ -106,7 +110,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                   {item.type === "video" ? (
                     <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-medium">Video</div>
                   ) : (
-                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" />
+                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" fit={fitForProduct} />
                   )}
                 </button>
               ))}

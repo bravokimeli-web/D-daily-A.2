@@ -10,6 +10,7 @@ type ProductImageProps = {
   className?: string;
   sizes?: string;
   priority?: boolean;
+  fit?: "cover" | "contain";
   variants?: {
     thumbnail?: string;
     medium?: string;
@@ -22,9 +23,11 @@ function isOptimizable(src: string) {
   return src.startsWith("/") || src.startsWith("https://");
 }
 
-export function ProductImage({ src, alt, className, sizes, priority, variants }: ProductImageProps) {
+export function ProductImage({ src, alt, className, sizes, priority, fit = "cover", variants }: ProductImageProps) {
   const [error, setError] = useState(false);
   const displaySrc = !error && variants?.webp ? variants.webp : src;
+
+  const baseFitClass = fit === "contain" ? "object-contain" : "object-cover";
 
   if (!isOptimizable(displaySrc)) {
     return (
@@ -32,7 +35,7 @@ export function ProductImage({ src, alt, className, sizes, priority, variants }:
       <img
         src={displaySrc}
         alt={alt}
-        className={cn("object-cover transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
+        className={cn(baseFitClass, "transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
         loading={priority ? "eager" : "lazy"}
       />
     );
@@ -45,7 +48,7 @@ export function ProductImage({ src, alt, className, sizes, priority, variants }:
       src={displaySrc}
       alt={alt}
       fill
-      className={cn("object-cover transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
+      className={cn(baseFitClass, "transform-gpu will-change-[transform] backface-visibility-[hidden]", className)}
       sizes={sizes ?? "(max-width: 640px) 100vw, 50vw"}
       priority={priority}
       unoptimized={unoptimized}
