@@ -45,6 +45,8 @@ export interface Product {
   price: number | null;
   category: string;
   image: string;
+  images?: string[];
+  video?: string;
   tagline: string;
   description: string;
   usage: string[];
@@ -52,6 +54,7 @@ export interface Product {
   specs: { label: string; value: string }[];
   badge?: string;
   stock: number;
+  variants?: { id: string; label: string; price: number; originalPrice?: number }[];
   isActive: boolean;
 }
 

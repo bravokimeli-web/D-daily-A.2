@@ -23,6 +23,7 @@ export interface Product {
   category: Category;
   image: string;
   images?: string[];
+  video?: string;
   imageVariants?: {
     thumbnail?: string;
     medium?: string;

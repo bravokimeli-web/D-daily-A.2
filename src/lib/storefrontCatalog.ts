@@ -48,6 +48,7 @@ export type ApiProductRow = {
   badge?: string;
   originalPrice?: number;
   images?: string[];
+  video?: string;
   variants?: { id: string; label: string; price: number; originalPrice?: number }[];
   imageVariants?: Product["imageVariants"];
 };
@@ -67,6 +68,7 @@ export function mapApiProductToStorefront(p: ApiProductRow): Product {
     specs: Array.isArray(p.specs) ? p.specs : [],
     badge: p.badge,
     images: p.images,
+    video: p.video,
     variants: p.variants,
     imageVariants: p.imageVariants,
   };

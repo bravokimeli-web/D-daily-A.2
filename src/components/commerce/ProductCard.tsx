@@ -12,9 +12,6 @@ import { ShoppingBag } from "lucide-react";
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
-  const imageFit = ["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"].includes(product.slug)
-    ? "contain"
-    : undefined;
 
   return (
     <div className="group relative flex h-full min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate transform-gpu will-change-[transform] backface-visibility-[hidden] hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
@@ -24,8 +21,6 @@ export function ProductCard({ product }: { product: Product }) {
           src={imageSrc}
           alt={`${product.name} - ${product.tagline || product.category}`}
           variants={product.imageVariants}
-          objectFit={imageFit}
-          objectPosition={imageFit ? "center" : undefined}
           className="h-full w-full group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />

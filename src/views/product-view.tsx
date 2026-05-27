@@ -18,7 +18,7 @@ type ProductViewProps = {
 
 export function ProductView({ product, related }: ProductViewProps) {
   const [qty, setQty] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedMedia, setSelectedMedia] = useState(0);
   const defaultVariant = product.variants?.[0];
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariant?.id ?? "");
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? defaultVariant;
@@ -32,6 +32,11 @@ export function ProductView({ product, related }: ProductViewProps) {
   const primaryImage = resolveMediaUrl(String(product.image));
   const allImagesRaw = product.images && product.images.length > 0 ? product.images : [product.image];
   const allImages = allImagesRaw.map((img) => resolveMediaUrl(String(img)));
+  const mediaItems: Array<{ type: "image" | "video"; src: string }> = [
+    ...allImages.map((src) => ({ type: "image" as const, src })),
+    ...(product.video ? [{ type: "video" as const, src: resolveMediaUrl(product.video) }] : []),
+  ];
+  const selected = mediaItems[selectedMedia] ?? mediaItems[0];
 
   const displayPrice = selectedVariant?.price ?? product.price;
   const displayOriginalPrice = selectedVariant?.originalPrice ?? product.originalPrice;
@@ -45,7 +50,7 @@ export function ProductView({ product, related }: ProductViewProps) {
         variant: selectedVariantLabel,
         name: selectedVariantLabel ? `${product.name} (${selectedVariantLabel})` : product.name,
         price: displayPrice,
-        image: allImages[selectedImage] ?? primaryImage,
+        image: selected?.type === "image" ? selected.src : allImages[0] ?? primaryImage,
       },
       qty,
     );
@@ -57,10 +62,6 @@ export function ProductView({ product, related }: ProductViewProps) {
       },
     });
   };
-
-  const imageFit = ["mosquito-window-net", "solar-ceiling-light-200w", "led-light-100w"].includes(product.slug)
-    ? "contain"
-    : undefined;
 
   return (
     <div className="pb-32 md:pb-12">
@@ -79,27 +80,34 @@ export function ProductView({ product, related }: ProductViewProps) {
       <div className="container-px mx-auto max-w-7xl grid lg:grid-cols-2 gap-10 lg:gap-16">
         <div className="space-y-4">
           <div className="aspect-square rounded-3xl bg-surface overflow-hidden relative">
-            <ProductImage
-              src={allImages[selectedImage]}
-              alt={product.name}
-              variants={product.imageVariants}
-              priority={selectedImage === 0}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              objectFit={imageFit}
-              objectPosition={imageFit ? "center" : undefined}
-            />
-          {allImages.length > 1 && (
+            {selected?.type === "video" ? (
+              <video src={selected.src} controls className="h-full w-full object-cover" />
+            ) : (
+              <ProductImage
+                src={selected?.src ?? allImages[0]}
+                alt={product.name}
+                variants={product.imageVariants}
+                priority={selectedMedia === 0}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            )}
+          </div>
+          {mediaItems.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {allImages.map((image, index) => (
+              {mediaItems.map((item, index) => (
                 <button
                   key={index}
                   type="button"
-                  onClick={() => setSelectedImage(index)}
+                  onClick={() => setSelectedMedia(index)}
                   className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === index ? "border-primary" : "border-border hover:border-primary/50"
+                    selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <ProductImage src={image} alt={`${product.name} ${index + 1}`} sizes="80px" />
+                  {item.type === "video" ? (
+                    <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-medium">Video</div>
+                  ) : (
+                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" />
+                  )}
                 </button>
               ))}
             </div>

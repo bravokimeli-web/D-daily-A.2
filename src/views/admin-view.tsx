@@ -6,7 +6,7 @@ import { getApiBaseUrl, resolveMediaUrl } from "@/lib/api";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
-import { BarChart3, LogOut, Package, ShoppingCart, Users, Settings, Trash2, Eye, FileText, CheckCircle, XCircle, ExternalLink, Upload } from "lucide-react";
+import { BarChart3, LogOut, Package, ShoppingCart, Users, Settings, Trash2, Eye, FileText, CheckCircle, XCircle, ExternalLink, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 function formatAppliedAt(value: string | Date | undefined): string {
@@ -40,6 +40,27 @@ function parseSpecLines(raw: FormDataEntryValue | null | undefined): { label: st
   return out;
 }
 
+function parseVariantLines(
+  raw: FormDataEntryValue | null | undefined
+): { id: string; label: string; price: number; originalPrice?: number }[] {
+  const out: { id: string; label: string; price: number; originalPrice?: number }[] = [];
+  for (const line of linesToArray(raw)) {
+    const [labelRaw, priceRaw, originalRaw] = line.split("|").map((part) => part.trim());
+    if (!labelRaw || !priceRaw) continue;
+    const price = Number(priceRaw);
+    if (!Number.isFinite(price) || price < 0) continue;
+    const originalPrice = originalRaw ? Number(originalRaw) : undefined;
+    const id = labelRaw.toLowerCase().replace(/\s+/g, "-");
+    out.push({
+      id,
+      label: labelRaw,
+      price,
+      originalPrice: Number.isFinite(originalPrice) ? originalPrice : undefined,
+    });
+  }
+  return out;
+}
+
 export function AdminView() {
     const [token, setToken] = useState<string | null>(null);
     const [adminEmail, setAdminEmail] = useState<string | null>(null);
@@ -64,9 +85,10 @@ export function AdminView() {
     const [resellers, setResellers] = useState<any[]>([]);
     const [loadingResellers, setLoadingResellers] = useState(false);
     const [resellerFilter, setResellerFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+    const [mediaPreviews, setMediaPreviews] = useState<Array<{ type: "image" | "video"; url: string }>>([]);
     const [dropActive, setDropActive] = useState(false);
+    const [editingSlug, setEditingSlug] = useState<string | null>(null);
 
     const loadWebsiteProducts = useCallback(async () => {
       setLoadingProducts(true);
@@ -268,23 +290,36 @@ export function AdminView() {
       window.location.href = "/";
     };
 
-    const handleImageSelected = (file: File | null) => {
-      if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
-      if (!file) {
-        setImageFile(null);
-        setImagePreview(null);
+    const resetLocalMedia = () => {
+      for (const preview of mediaPreviews) {
+        if (preview.url.startsWith("blob:")) URL.revokeObjectURL(preview.url);
+      }
+      setMediaFiles([]);
+      setMediaPreviews([]);
+    };
+
+    const handleMediaSelected = (files: FileList | null) => {
+      if (!files || files.length === 0) return;
+      const accepted = Array.from(files).filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
+      if (accepted.length === 0) {
+        toast.error("Please choose image or video files.");
         return;
       }
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      const nextFiles = [...mediaFiles, ...accepted];
+      setMediaFiles(nextFiles);
+      setMediaPreviews([
+        ...mediaPreviews,
+        ...accepted.map((file) => ({
+          type: file.type.startsWith("video/") ? ("video" as const) : ("image" as const),
+          url: URL.createObjectURL(file),
+        })),
+      ]);
     };
 
     const handleProductImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setDropActive(false);
-      const file = e.dataTransfer.files?.[0];
-      if (file && file.type.startsWith("image/")) handleImageSelected(file);
-      else if (file) toast.error("Please drop an image file (JPEG, PNG, WebP, or GIF).");
+      handleMediaSelected(e.dataTransfer.files);
     };
 
     const handleProductImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -301,11 +336,14 @@ export function AdminView() {
       const formData = new FormData(e.currentTarget);
       const name = (formData.get("name") as string)?.trim();
       const imageUrlField = (formData.get("imageUrl") as string)?.trim();
+      const imageUrlsField = linesToArray(formData.get("imageUrls"));
+      const videoUrlField = (formData.get("videoUrl") as string)?.trim();
       const description = (formData.get("description") as string)?.trim() || name;
       const taglineField = (formData.get("tagline") as string)?.trim();
       const usage = linesToArray(formData.get("usage"));
       const safety = linesToArray(formData.get("safety"));
       const specs = parseSpecLines(formData.get("specs"));
+      const variants = parseVariantLines(formData.get("variants"));
       const priceRaw = formData.get("price") as string;
       const originalPriceRaw = (formData.get("originalPrice") as string) || "";
       const category = formData.get("category") as string;
@@ -318,21 +356,39 @@ export function AdminView() {
       }
 
       let imageForProduct = imageUrlField;
-      if (imageFile) {
+      const galleryImages = [...imageUrlsField];
+      let videoForProduct = videoUrlField;
+      let uploadedImageVariants: any = undefined;
+
+      if (mediaFiles.length > 0) {
         try {
-          const fd = new FormData();
-          fd.append("image", imageFile);
-          const up = await fetch(`${getApiBaseUrl()}/admin/products/upload`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}` },
-            body: fd,
-          });
-          const uj = await up.json().catch(() => ({}));
-          if (!up.ok) {
-            toast.error(typeof uj.message === "string" ? uj.message : "Image upload failed");
-            return;
+          for (const mediaFile of mediaFiles) {
+            const fd = new FormData();
+            fd.append("media", mediaFile);
+            const up = await fetch(`${getApiBaseUrl()}/admin/products/upload`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${token}` },
+              body: fd,
+            });
+            const uj = await up.json().catch(() => ({}));
+            if (!up.ok) {
+              toast.error(typeof uj.message === "string" ? uj.message : "Media upload failed");
+              return;
+            }
+            const uploadedUrl = uj.data?.url as string | undefined;
+            const mediaType = uj.data?.mediaType as "image" | "video" | undefined;
+            if (!uploadedUrl) continue;
+            if (mediaType === "video") {
+              if (!videoForProduct) videoForProduct = uploadedUrl;
+            } else {
+              if (!imageForProduct) {
+                imageForProduct = uploadedUrl;
+                uploadedImageVariants = uj.data?.variants;
+              } else {
+                galleryImages.push(uploadedUrl);
+              }
+            }
           }
-          imageForProduct = uj.data?.url as string;
         } catch (err) {
           toast.error((err as Error).message);
           return;
@@ -340,7 +396,7 @@ export function AdminView() {
       }
 
       if (!imageForProduct) {
-        toast.error("Add an image by dragging a file into the box, choosing a file, or paste an image URL below.");
+        toast.error("Add at least one product image by upload or URL.");
         return;
       }
 
@@ -352,42 +408,85 @@ export function AdminView() {
           .replace(/-+/g, "-")
           .replace(/^-|-$/g, "") || `product-${Date.now()}`;
 
+      const payload = {
+        slug,
+        name,
+        price: parseFloat(priceRaw),
+        originalPrice: originalPriceRaw ? parseFloat(originalPriceRaw) : undefined,
+        category,
+        image: imageForProduct,
+        images: galleryImages,
+        video: videoForProduct || undefined,
+        imageVariants: uploadedImageVariants,
+        tagline,
+        description,
+        usage,
+        safety,
+        specs,
+        variants,
+        stock: Math.max(0, parseInt(stockRaw, 10) || 0),
+      };
+
       try {
-        const response = await fetch(`${getApiBaseUrl()}/admin/products`, {
-          method: "POST",
+        const isEditing = Boolean(editingSlug);
+        const response = await fetch(
+          isEditing
+            ? `${getApiBaseUrl()}/admin/products/${encodeURIComponent(editingSlug as string)}`
+            : `${getApiBaseUrl()}/admin/products`,
+          {
+          method: isEditing ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            slug,
-            name,
-            price: parseFloat(priceRaw),
-            originalPrice: originalPriceRaw ? parseFloat(originalPriceRaw) : undefined,
-            category,
-            image: imageForProduct,
-            tagline,
-            description,
-            usage,
-            safety,
-            specs,
-            stock: Math.max(0, parseInt(stockRaw, 10) || 0),
-          }),
+          body: JSON.stringify(payload),
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          toast.error(typeof data.message === "string" ? data.message : "Failed to create product");
+          toast.error(typeof data.message === "string" ? data.message : `Failed to ${isEditing ? "update" : "create"} product`);
           return;
         }
-        toast.success("Product created");
+        toast.success(isEditing ? "Product updated" : "Product created");
         (e.target as HTMLFormElement).reset();
-        if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
-        setImageFile(null);
-        setImagePreview(null);
+        resetLocalMedia();
+        setEditingSlug(null);
         await loadWebsiteProducts();
       } catch (err) {
         toast.error((err as Error).message);
       }
+    };
+
+    const handleEditProduct = (product: any) => {
+      const form = document.getElementById("admin-product-form") as HTMLFormElement | null;
+      if (!form) return;
+      setEditingSlug(product.slug);
+      resetLocalMedia();
+      const specs = Array.isArray(product.specs) ? product.specs.map((s: any) => `${s.label} | ${s.value}`).join("\n") : "";
+      const variants = Array.isArray(product.variants)
+        ? product.variants.map((v: any) => `${v.label} | ${v.price}${v.originalPrice ? ` | ${v.originalPrice}` : ""}`).join("\n")
+        : "";
+      const imageUrls = Array.isArray(product.images) ? product.images.join("\n") : "";
+      const fields: Array<[string, string]> = [
+        ["name", product.name ?? ""],
+        ["price", String(product.price ?? "")],
+        ["originalPrice", String(product.originalPrice ?? "")],
+        ["category", product.category ?? ""],
+        ["stock", String(product.stock ?? "0")],
+        ["imageUrl", product.image ?? ""],
+        ["imageUrls", imageUrls],
+        ["videoUrl", product.video ?? ""],
+        ["description", product.description ?? ""],
+        ["tagline", product.tagline ?? ""],
+        ["usage", Array.isArray(product.usage) ? product.usage.join("\n") : ""],
+        ["safety", Array.isArray(product.safety) ? product.safety.join("\n") : ""],
+        ["specs", specs],
+        ["variants", variants],
+      ];
+      for (const [name, value] of fields) {
+        const node = form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+        if (node) node.value = value;
+      }
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     const handleDeleteProduct = async (slug: string) => {
@@ -514,12 +613,12 @@ export function AdminView() {
           {activeTab === "products" && (
             <div className="space-y-8">
               <div>
-                <h2 className="text-xl font-bold text-foreground mb-4">Add New Product</h2>
+                <h2 className="text-xl font-bold text-foreground mb-4">{editingSlug ? "Edit Product" : "Add New Product"}</h2>
                 <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
-                  Drag and drop a product image or choose a file (JPEG, PNG, WebP, or GIF, up to 8MB). The image is uploaded
-                  to the server first, then the product is created. Optionally you can paste an image URL instead of uploading.
+                  Upload multiple product media files (images and optional video) or paste direct URLs. For Fashion & Design,
+                  add size variants in the variants field.
                 </p>
-                <form onSubmit={handleAddProduct} className="rounded-lg border border-border bg-card p-6 space-y-4 max-w-2xl">
+                <form id="admin-product-form" onSubmit={handleAddProduct} className="rounded-lg border border-border bg-card p-6 space-y-4 max-w-2xl">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium">Product Name</label>
@@ -584,7 +683,7 @@ export function AdminView() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Product image</label>
+                    <label className="text-sm font-medium">Product media (images and video)</label>
                     <div
                       className={`mt-2 rounded-2xl border-2 border-dashed p-5 text-center transition-colors ${
                         dropActive ? "border-primary bg-primary/5" : "border-input bg-background"
@@ -596,45 +695,77 @@ export function AdminView() {
                       <input
                         id="admin-product-image"
                         type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+                        multiple
                         className="hidden"
-                        onChange={(ev) => handleImageSelected(ev.target.files?.[0] ?? null)}
+                        onChange={(ev) => handleMediaSelected(ev.target.files)}
                       />
                       <label htmlFor="admin-product-image" className="cursor-pointer block">
-                        {imagePreview ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="mx-auto max-h-48 w-auto rounded-xl object-contain border border-border"
-                          />
+                        {mediaPreviews.length > 0 ? (
+                          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                            {mediaPreviews.map((preview, index) =>
+                              preview.type === "video" ? (
+                                <video key={`${preview.url}-${index}`} src={preview.url} controls className="h-28 w-full rounded-xl border border-border object-cover" />
+                              ) : (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  key={`${preview.url}-${index}`}
+                                  src={preview.url}
+                                  alt={`Preview ${index + 1}`}
+                                  className="h-28 w-full rounded-xl object-cover border border-border"
+                                />
+                              )
+                            )}
+                          </div>
                         ) : (
                           <div className="space-y-2 text-sm text-muted-foreground">
                             <Upload className="h-8 w-8 mx-auto text-primary" />
-                            <p className="font-semibold text-foreground">Drag and drop an image here</p>
-                            <p>or click to choose a file</p>
+                            <p className="font-semibold text-foreground">Drag and drop images/videos here</p>
+                            <p>or click to choose multiple files</p>
                           </div>
                         )}
                       </label>
-                      {imagePreview && (
+                      {mediaPreviews.length > 0 && (
                         <button
                           type="button"
                           className="mt-3 text-xs font-medium text-destructive hover:underline"
-                          onClick={() => handleImageSelected(null)}
+                          onClick={resetLocalMedia}
                         >
-                          Remove image
+                          Remove selected media
                         </button>
                       )}
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium">Or image URL (optional if you uploaded above)</label>
+                    <label className="text-sm font-medium">Primary image URL (optional if uploaded)</label>
                     <input
                       name="imageUrl"
                       type="text"
                       inputMode="url"
                       placeholder="https://… or /uploads/…"
+                      className="mt-2 w-full h-10 px-3 rounded-lg border border-input bg-background"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Additional image URLs (optional)</label>
+                    <p className="text-xs text-muted-foreground mt-0.5 mb-1">One URL per line.</p>
+                    <textarea
+                      name="imageUrls"
+                      rows={3}
+                      placeholder={"https://.../image-2.jpg\nhttps://.../image-3.jpg"}
+                      className="mt-1 w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Video URL (optional)</label>
+                    <input
+                      name="videoUrl"
+                      type="text"
+                      inputMode="url"
+                      placeholder="https://.../product-video.mp4"
                       className="mt-2 w-full h-10 px-3 rounded-lg border border-input bg-background"
                     />
                   </div>
@@ -695,10 +826,38 @@ export function AdminView() {
                     />
                   </div>
 
+                  <div>
+                    <label className="text-sm font-medium">Variants (sizes/options)</label>
+                    <p className="text-xs text-muted-foreground mt-0.5 mb-1">
+                      One per line: <span className="font-mono">Size/Label | Price | Original Price(optional)</span>
+                    </p>
+                    <textarea
+                      name="variants"
+                      placeholder={"e.g.\nSize 40 | 2500 | 3000\nSize 41 | 2500 | 3000"}
+                      rows={4}
+                      className="mt-1 w-full px-3 py-2 rounded-lg border border-input bg-background font-mono text-sm"
+                    />
+                  </div>
+
                   <Button type="submit" className="w-full">
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload image and add product
+                    {editingSlug ? "Update product" : "Upload media and add product"}
                   </Button>
+                  {editingSlug && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const form = document.getElementById("admin-product-form") as HTMLFormElement | null;
+                        form?.reset();
+                        setEditingSlug(null);
+                        resetLocalMedia();
+                      }}
+                    >
+                      Cancel editing
+                    </Button>
+                  )}
                 </form>
               </div>
 
@@ -734,14 +893,24 @@ export function AdminView() {
                             <p className="text-xs text-muted-foreground font-mono truncate">{p.slug}</p>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProduct(p.slug)}
-                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Remove from site
-                        </button>
+                        <div className="inline-flex shrink-0 items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditProduct(p)}
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProduct(p.slug)}
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Remove from site
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
