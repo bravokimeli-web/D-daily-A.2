@@ -21,6 +21,7 @@ export function ProductView({ product, related }: ProductViewProps) {
   const [qty, setQty] = useState(1);
   const [selectedMedia, setSelectedMedia] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const defaultVariant = product.variants?.[0];
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariant?.id ?? "");
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? defaultVariant;
@@ -95,20 +96,28 @@ export function ProductView({ product, related }: ProductViewProps) {
               fitForProduct === "contain" ? "bg-white dark:bg-zinc-900" : "bg-surface"
             )}
             onTouchStart={(e) => {
-              (touchStartX.current as any) = e.touches[0]?.clientX ?? null;
+              touchStartX.current = e.touches[0]?.clientX ?? null;
+              touchStartY.current = e.touches[0]?.clientY ?? null;
             }}
             onTouchEnd={(e) => {
-              const start = touchStartX.current;
-              const end = e.changedTouches[0]?.clientX ?? null;
-              if (start == null || end == null) return;
-              const diff = start - end;
-              const threshold = 50; // px
-              if (diff > threshold) {
-                setSelectedMedia((i) => Math.min(mediaItems.length - 1, i + 1));
-              } else if (diff < -threshold) {
-                setSelectedMedia((i) => Math.max(0, i - 1));
+              const startX = touchStartX.current;
+              const startY = touchStartY.current;
+              const endX = e.changedTouches[0]?.clientX ?? null;
+              const endY = e.changedTouches[0]?.clientY ?? null;
+              if (startX == null || startY == null || endX == null || endY == null) return;
+
+              const diffX = startX - endX;
+              const diffY = startY - endY;
+
+              if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                  setSelectedMedia((i) => Math.min(mediaItems.length - 1, i + 1));
+                } else {
+                  setSelectedMedia((i) => Math.max(0, i - 1));
+                }
               }
               touchStartX.current = null;
+              touchStartY.current = null;
             }}
           >
             {selected?.type === "video" ? (
@@ -148,14 +157,14 @@ export function ProductView({ product, related }: ProductViewProps) {
           </div>
 
           {mediaItems.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory [-webkit-overflow-scrolling:touch]">
               {mediaItems.map((item, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => setSelectedMedia(index)}
                   className={cn(
-                    "relative flex-shrink-0 min-w-[64px] w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300",
+                    "relative flex-shrink-0 min-w-[64px] w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 snap-start active:scale-95 touch-manipulation",
                     selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50",
                     fitForProduct === "contain" ? "bg-white dark:bg-zinc-900" : "bg-surface"
                   )}
