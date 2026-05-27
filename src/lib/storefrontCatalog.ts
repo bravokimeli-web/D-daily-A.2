@@ -99,13 +99,12 @@ async function fetchHomepageProducts(): Promise<StorefrontCatalog> {
 
   try {
     const base = getApiBaseUrl();
-    const res = await fetch(`${base}/homepage-products`, { cache: "no-store" });
+    // Use active products endpoint so homepage always reflects admin edits.
+    const res = await fetch(`${base}/products?active=true`, { cache: "no-store" });
     if (res.ok) {
-      const json = (await res.json()) as { success?: boolean; data?: ApiProductRow[] };
-      if (json.success && Array.isArray(json.data)) {
-        apiList = json.data.map(mapApiProductToStorefront);
-        apiAvailable = true;
-      }
+      const json = (await res.json()) as { data?: ApiProductRow[] };
+      apiList = (json.data ?? []).map(mapApiProductToStorefront);
+      apiAvailable = true;
     }
   } catch {
     /* offline — static catalog still renders */
