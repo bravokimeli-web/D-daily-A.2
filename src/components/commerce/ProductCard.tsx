@@ -15,16 +15,7 @@ export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
   const isSoldOut = (product as any).stock !== undefined && Number((product as any).stock) <= 0;
-  const containSlugs = new Set([
-    "mosquito-window-net",
-    "solar-ceiling-light-200w",
-    "led-light-100w",
-    "snake-repellent-powder",
-    "insecticidal-spray",
-    "automatic-fly-catcher",
-    "4-in-1-home-pest-control-kit",
-  ]);
-  const fit: "cover" | "contain" = containSlugs.has(product.slug) ? "contain" : "cover";
+  const fit: "cover" | "contain" = "contain";
 
   return (
     <div className="group relative flex h-full min-h-0 flex-col rounded-2xl bg-card border border-border/60 overflow-hidden isolate transform-gpu will-change-[transform] backface-visibility-[hidden] hover:shadow-elevated hover:-translate-y-0.5 transition-all duration-300">
