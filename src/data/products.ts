@@ -7,7 +7,7 @@ const IMG = {
   fly: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/fly-catcher_gbolka",
   wrist: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Mosquito-Repellent-Wristband_wvj0ye",
   solar200w: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/200w_solar_2k_aqvidy",
-  magneticWindow: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/magnetic-windows-net_aynkbi",
+  magneticWindow: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/mosquito-window-net_wx8up8",
   kit4in1: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/4-1-kit_nzknir",
   kitComplete: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/complete-home-kit.jpeg",
   kitBeforeAfter: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/be-after-4-1.jpeg",
