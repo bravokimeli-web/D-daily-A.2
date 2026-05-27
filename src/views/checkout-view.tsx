@@ -15,6 +15,7 @@ export function CheckoutView() {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
@@ -32,7 +33,7 @@ export function CheckoutView() {
     setLoading(true);
     try {
       const res = await ordersApi.create({
-        customer: { name, email: email || undefined, city, address },
+        customer: { name, email: email || undefined, phone: phone || undefined, city, address },
         items: items.map((i) => ({ slug: i.slug, name: i.name, price: i.price, qty: i.qty, image: i.image })),
         courier,
       });
@@ -68,8 +69,16 @@ export function CheckoutView() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <Field
+              id="checkout-phone"
+              label="Phone number"
+              type="tel"
+              placeholder="e.g. 0712 345 678"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
             <p className="text-sm text-muted-foreground">
-              Phone is optional. Paystack will prompt for any required number during payment.
+              Phone is optional, but it helps us confirm delivery and share payment details if needed.
             </p>
           </Section>
           <Section title="Delivery">
