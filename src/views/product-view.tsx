@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { formatKES, type Product } from "@/data/products";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/carts";
-import { Truck, ShieldCheck, Smartphone, Minus, Plus, ChevronRight } from "lucide-react";
+import { Truck, ShieldCheck, Smartphone, Minus, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { ProductImage } from "@/components/ui/product-image";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ type ProductViewProps = {
 export function ProductView({ product, related }: ProductViewProps) {
   const [qty, setQty] = useState(1);
   const [selectedMedia, setSelectedMedia] = useState(0);
+  const touchStartX = useRef<number | null>(null);
   const defaultVariant = product.variants?.[0];
   const [selectedVariantId, setSelectedVariantId] = useState(defaultVariant?.id ?? "");
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId) ?? defaultVariant;
@@ -92,14 +93,28 @@ export function ProductView({ product, related }: ProductViewProps) {
 
       <div className="container-px mx-auto max-w-7xl grid lg:grid-cols-2 gap-10 lg:gap-16">
         <div className="space-y-4">
-          <div className="relative w-full overflow-hidden rounded-3xl bg-surface max-h-[65vh] aspect-[4/3] md:aspect-square">
+          {/* Gallery: fixed aspect frame, touch/swipe support and mobile arrows */}
+          <div
+            className="aspect-square rounded-3xl bg-surface overflow-hidden relative"
+            onTouchStart={(e) => {
+              (touchStartX.current as any) = e.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(e) => {
+              const start = touchStartX.current;
+              const end = e.changedTouches[0]?.clientX ?? null;
+              if (start == null || end == null) return;
+              const diff = start - end;
+              const threshold = 50; // px
+              if (diff > threshold) {
+                setSelectedMedia((i) => Math.min(mediaItems.length - 1, i + 1));
+              } else if (diff < -threshold) {
+                setSelectedMedia((i) => Math.max(0, i - 1));
+              }
+              touchStartX.current = null;
+            }}
+          >
             {selected?.type === "video" ? (
-              <video
-                src={selected.src}
-                controls
-                className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`}
-                style={{ minHeight: 0 }}
-              />
+              <video src={selected.src} controls className={`h-full w-full ${fitForProduct === "contain" ? "object-contain" : "object-cover"}`} />
             ) : (
               <ProductImage
                 src={selected?.src ?? allImages[0]}
@@ -107,10 +122,32 @@ export function ProductView({ product, related }: ProductViewProps) {
                 variants={product.imageVariants}
                 fit={fitForProduct}
                 priority={selectedMedia === 0}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
             )}
+
+            {mediaItems.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous image"
+                  onClick={() => setSelectedMedia((i) => Math.max(0, i - 1))}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/70 p-2 border border-border shadow-md md:hidden"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next image"
+                  onClick={() => setSelectedMedia((i) => Math.min(mediaItems.length - 1, i + 1))}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/70 p-2 border border-border shadow-md md:hidden"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
           </div>
+
           {mediaItems.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
               {mediaItems.map((item, index) => (
@@ -118,20 +155,14 @@ export function ProductView({ product, related }: ProductViewProps) {
                   key={index}
                   type="button"
                   onClick={() => setSelectedMedia(index)}
-                  className={`relative flex-shrink-0 min-w-[80px] h-20 w-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`relative flex-shrink-0 min-w-[64px] w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
                     selectedMedia === index ? "border-primary" : "border-border hover:border-primary/50"
                   }`}
                 >
                   {item.type === "video" ? (
                     <div className="h-full w-full bg-muted flex items-center justify-center text-xs font-medium">Video</div>
                   ) : (
-                    <ProductImage
-                      src={item.src}
-                      alt={`${product.name} ${index + 1}`}
-                      sizes="80px"
-                      fit={fitForProduct}
-                      className="h-full w-full"
-                    />
+                    <ProductImage src={item.src} alt={`${product.name} ${index + 1}`} sizes="80px" fit={fitForProduct} />
                   )}
                 </button>
               ))}
