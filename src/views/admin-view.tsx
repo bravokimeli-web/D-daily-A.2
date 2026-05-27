@@ -835,7 +835,7 @@ export function AdminView() {
                           {(order.status === "paid" || order.status === "processing" || order.status === "shipped") && order.customer?.email && (
                             <Button
                               size="sm"
-                              variant="secondary"
+                              variant="default"
                               onClick={() => sendOrderEmailAction(order.orderNumber, "shipped")}
                             >
                               Send shipped notice
@@ -844,7 +844,7 @@ export function AdminView() {
                           {(order.status === "paid" || order.status === "processing" || order.status === "shipped" || order.status === "delivered") && order.customer?.email && (
                             <Button
                               size="sm"
-                              variant="secondary"
+                              variant="default"
                               onClick={() => sendOrderEmailAction(order.orderNumber, "delivered")}
                             >
                               Send delivered reminder
