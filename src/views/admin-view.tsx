@@ -587,7 +587,7 @@ export function AdminView() {
       try {
         const response = await fetch(`${getApiBaseUrl()}/admin/products/${encodeURIComponent(slug)}`, {
           method: "DELETE",
-          headers: { "Authorization": `Bearer ${token}` },
+          headers: { "Authorization": `Bearer ${token ?? localStorage.getItem("admin_token")}` },
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.message || "Failed to remove product");
@@ -603,21 +603,43 @@ export function AdminView() {
         toast.error("Publish this product first, then update stock.");
         return;
       }
+
+      const authToken = token ?? localStorage.getItem("admin_token");
+      if (!authToken) {
+        toast.error("Admin authentication required.");
+        return;
+      }
+
       try {
+        const clamped = Math.max(0, Math.floor(stock));
+        const payload: any = {};
+
+        // If the product has variants, update their stock as well so storefront variant checks reflect the change.
+        if (Array.isArray(product.variants) && product.variants.length > 0) {
+          payload.variants = product.variants.map((v: any) => ({ ...v, stock: clamped }));
+        } else {
+          payload.stock = clamped;
+        }
+
         const response = await fetch(`${getApiBaseUrl()}/admin/products/${encodeURIComponent(product.slug)}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${authToken}`,
           },
-          body: JSON.stringify({ stock: Math.max(0, Math.floor(stock)) }),
+          body: JSON.stringify(payload),
         });
+
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "Failed to update stock");
+        if (!response.ok) {
+          console.error("Failed to update stock", { status: response.status, body: data });
+          throw new Error(data.message || "Failed to update stock");
+        }
+
         toast.success("Stock updated");
         await loadWebsiteProducts();
       } catch (err) {
-        toast.error((err as Error).message);
+        toast.error((err as Error).message || "Failed to update stock");
       }
     };
 
