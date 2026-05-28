@@ -599,11 +599,6 @@ export function AdminView() {
     };
 
     const handleSetProductStock = async (product: any, stock: number) => {
-      if (!dbProductSlugs.has(product.slug)) {
-        toast.error("Publish this product first, then update stock.");
-        return;
-      }
-
       const authToken = token ?? localStorage.getItem("admin_token");
       if (!authToken) {
         toast.error("Admin authentication required.");
@@ -613,6 +608,48 @@ export function AdminView() {
       try {
         const clamped = Math.max(0, Math.floor(stock));
         const payload: any = {};
+
+        // If the product is not yet in the database, create it first (publish)
+        if (!dbProductSlugs.has(product.slug)) {
+          const createPayload: any = {
+            slug: product.slug,
+            name: product.name,
+            price: product.price ?? null,
+            originalPrice: product.originalPrice,
+            category: product.category,
+            image: product.image ?? "",
+            images: Array.isArray(product.images) ? product.images : [],
+            video: product.video,
+            imageVariants: product.imageVariants,
+            tagline: product.tagline ?? product.description?.slice(0, 120) ?? "",
+            description: product.description ?? product.name,
+            usage: Array.isArray(product.usage) ? product.usage : [],
+            safety: Array.isArray(product.safety) ? product.safety : [],
+            specs: Array.isArray(product.specs) ? product.specs : [],
+            variants: Array.isArray(product.variants)
+              ? product.variants.map((v: any) => ({ id: v.id ?? (v.label || "").toLowerCase().replace(/\s+/g, "-"), label: v.label, price: v.price, originalPrice: v.originalPrice, stock: Number.isFinite(v.stock) ? v.stock : undefined }))
+              : [],
+            stock: Array.isArray(product.variants) && product.variants.length > 0 ? undefined : clamped,
+          };
+
+          const createResp = await fetch(`${getApiBaseUrl()}/admin/products`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(createPayload),
+          });
+          const createData = await createResp.json().catch(() => ({}));
+          if (!createResp.ok) {
+            console.error("Failed to publish product", { status: createResp.status, body: createData });
+            throw new Error(createData.message || "Failed to publish product");
+          }
+
+          toast.success("Product published");
+          // Refresh product list and allow code below to update variants if needed
+          await loadWebsiteProducts();
+        }
 
         // If the product has variants, update their stock as well so storefront variant checks reflect the change.
         if (Array.isArray(product.variants) && product.variants.length > 0) {
@@ -1083,18 +1120,16 @@ export function AdminView() {
                             <button
                               type="button"
                               onClick={() => handleSetProductStock(p, 0)}
-                              disabled={!isFromDb}
-                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50"
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-300 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50"
                             >
-                              Mark sold out
+                              {isFromDb ? "Mark sold out" : "Publish & mark sold out"}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleSetProductStock(p, Math.max(1, Number(p.stock) || 1))}
-                              disabled={!isFromDb}
-                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-emerald-300 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-emerald-300 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
                             >
-                              Mark in stock
+                              {isFromDb ? "Mark in stock" : "Publish & mark in stock"}
                             </button>
                           </div>
                         </div>
