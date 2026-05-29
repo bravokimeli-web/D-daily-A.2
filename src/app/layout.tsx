@@ -41,7 +41,12 @@ export const metadata: Metadata = {
   publisher: SITE_NAME,
   formatDetection: { telephone: true, email: true },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48x48.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/icon-192x192.png", type: "image/png", sizes: "192x192" },
+    ],
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
@@ -60,8 +65,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="dns-prefetch" href={apiOrigin} />
         <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/icon-48x48.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/icon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

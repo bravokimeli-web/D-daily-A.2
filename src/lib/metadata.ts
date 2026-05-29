@@ -218,6 +218,7 @@ export function organizationJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     logo: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/Ddaily-logo_iefzvg",
+    alternateName: ["D-Daily Ltd", "ddaily", "ddaily ltd", "Ddaily", "D-Daily"],
     description:
       "D-Daily Ltd is a Kenyan retailer of pest control, lighting, home protection and farm protection essentials.",
     contactPoint: [
@@ -239,7 +240,7 @@ export function siteJsonLd() {
     "@type": "WebSite",
     name: SITE_NAME,
     url: SITE_URL,
-    alternateName: "D-Daily Ltd",
+    alternateName: ["D-Daily Ltd", "ddaily", "ddaily ltd", "Ddaily", "D-Daily"],
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,

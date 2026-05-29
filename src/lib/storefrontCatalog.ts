@@ -18,13 +18,15 @@ export function mergeStaticAndApiProducts(apiList: Product[]): Product[] {
   const ordered: Product[] = [];
   const seen = new Set<string>();
 
-  for (const p of staticCatalogProducts) {
-    ordered.push(bySlug.get(p.slug)!);
+  // Prioritize API products first so newly added products or updates show up first.
+  for (const p of apiList) {
+    ordered.push(p);
     seen.add(p.slug);
   }
-  for (const p of apiList) {
+  // Then append any static products that aren't overridden.
+  for (const p of staticCatalogProducts) {
     if (!seen.has(p.slug)) {
-      ordered.push(p);
+      ordered.push(bySlug.get(p.slug)!);
       seen.add(p.slug);
     }
   }

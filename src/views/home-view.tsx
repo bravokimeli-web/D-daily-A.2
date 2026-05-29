@@ -37,6 +37,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
         <div className="container-px mx-auto max-w-7xl py-16 md:py-24 lg:py-32 relative z-10 flex items-center justify-start min-h-screen">
           <div className="max-w-2xl">
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-white">
+              <span className="block text-primary text-sm md:text-base font-semibold uppercase tracking-widest mb-3">D-Daily Ltd</span>
               Protect what <span className="text-primary">matters</span>.
               <br />
               Every day.
