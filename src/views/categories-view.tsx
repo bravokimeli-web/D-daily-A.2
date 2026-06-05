@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/products";
-import { Lightbulb, Home, Leaf, Sparkles } from "lucide-react";
+import { Lightbulb, Home, Leaf, Sparkles, Package } from "lucide-react";
 import type { Product } from "@/data/products";
 import { resolveMediaUrl } from "@/lib/api";
+import { useMemo } from "react";
 
 const categoryIcons = {
   lighting: Lightbulb,
@@ -19,14 +20,34 @@ type CategoriesViewProps = {
 };
 
 export function CategoriesView({ initialProducts }: CategoriesViewProps) {
+  const allCategories = useMemo(() => {
+    const list = [...categories];
+    const staticIds = new Set(categories.map((c) => c.id));
+    for (const p of initialProducts) {
+      if (p.category && !staticIds.has(p.category)) {
+        staticIds.add(p.category);
+        const name = p.category
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        list.push({
+          id: p.category,
+          name,
+          description: `Browse products in ${name}`,
+        });
+      }
+    }
+    return list;
+  }, [initialProducts]);
+
   return (
     <div className="container-px mx-auto max-w-7xl py-16">
       <h1 className="font-display text-4xl md:text-5xl font-bold">Categories</h1>
       <p className="mt-3 text-muted-foreground max-w-xl">Explore our product universe.</p>
       <div className="mt-10 grid md:grid-cols-2 gap-5">
-        {categories.map((c) => {
+        {allCategories.map((c) => {
           const items = initialProducts.filter((p) => p.category === c.id);
-          const Icon = categoryIcons[c.id];
+          const Icon = categoryIcons[c.id as keyof typeof categoryIcons] || Package;
           return (
             <Link
               key={c.id}

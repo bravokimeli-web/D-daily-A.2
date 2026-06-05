@@ -3,16 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { categories, type Category, type Product } from "@/data/products";
+import { categories, type Product } from "@/data/products";
 import { ProductCard } from "@/components/commerce/ProductCard";
-
-const VALID_CATEGORIES = new Set<Category>(["lighting", "home-protection", "farm-protection", "fashion-design"]);
 
 type ShopViewProps = {
   initialProducts: Product[];
 };
 
-function buildShopHref(category?: Category, q?: string) {
+function buildShopHref(category?: string, q?: string) {
   const params = new URLSearchParams();
   if (category) params.set("category", category);
   if (q?.trim()) params.set("q", q.trim());
@@ -23,8 +21,36 @@ function buildShopHref(category?: Category, q?: string) {
 export function ShopView({ initialProducts }: ShopViewProps) {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
-  const cat =
-    categoryParam && VALID_CATEGORIES.has(categoryParam as Category) ? (categoryParam as Category) : undefined;
+
+  const validCategories = useMemo(() => {
+    const set = new Set<string>(["lighting", "home-protection", "farm-protection", "fashion-design"]);
+    for (const p of initialProducts) {
+      if (p.category) set.add(p.category);
+    }
+    return set;
+  }, [initialProducts]);
+
+  const cat = categoryParam && validCategories.has(categoryParam) ? categoryParam : undefined;
+
+  const shopCategories = useMemo(() => {
+    const list = [...categories];
+    const staticIds = new Set(categories.map((c) => c.id));
+    for (const p of initialProducts) {
+      if (p.category && !staticIds.has(p.category)) {
+        staticIds.add(p.category);
+        const name = p.category
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        list.push({
+          id: p.category,
+          name,
+          description: `Browse products in ${name}`,
+        });
+      }
+    }
+    return list;
+  }, [initialProducts]);
   const searchQ = searchParams.get("q") ?? undefined;
 
   const [q, setQ] = useState(searchQ ?? "");
@@ -70,7 +96,7 @@ export function ShopView({ initialProducts }: ShopViewProps) {
         >
           All
         </Link>
-        {categories.map((c) => (
+        {shopCategories.map((c) => (
           <Link
             key={c.id}
             href={buildShopHref(c.id, searchQ)}
@@ -98,7 +124,7 @@ export function ShopView({ initialProducts }: ShopViewProps) {
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
         <p>
           Showing <span className="font-semibold text-foreground">{filtered.length}</span> product{filtered.length === 1 ? "" : "s"}
-          {cat ? ` in ${categories.find((c) => c.id === cat)?.name}` : ""}
+          {cat ? ` in ${shopCategories.find((c) => c.id === cat)?.name}` : ""}
           {query ? ` for "${query}"` : ""}
         </p>
         {(cat || searchQ) && (

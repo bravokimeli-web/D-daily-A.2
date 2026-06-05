@@ -109,7 +109,7 @@ export function HomeView({ initialCatalog }: HomeViewProps) {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {categories.map((c) => {
-            const Icon = catIcons[c.id];
+            const Icon = catIcons[c.id as keyof typeof catIcons] || Sparkles;
             return (
               <div key={c.id}>
                 <Link

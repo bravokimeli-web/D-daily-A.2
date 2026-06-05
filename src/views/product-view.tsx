@@ -126,7 +126,7 @@ export function ProductView({ product, related }: ProductViewProps) {
               <ProductImage
                 src={selected?.src ?? allImages[0]}
                 alt={product.name}
-                variants={product.imageVariants}
+                variants={selected?.src === primaryImage ? product.imageVariants : undefined}
                 fit={fitForProduct}
                 priority={selectedMedia === 0}
                 className={cn(fitForProduct === "contain" ? "p-4 sm:p-6 md:p-8" : "")}

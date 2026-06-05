@@ -13,7 +13,7 @@ const IMG = {
   kitBeforeAfter: "https://res.cloudinary.com/daytxhhu5/image/upload/f_auto/q_auto/dpr_auto/be-after-4-1.jpeg",
 };
 
-export type Category = "lighting" | "home-protection" | "farm-protection" | "fashion-design";
+export type Category = string;
 
 export interface Product {
   slug: string;

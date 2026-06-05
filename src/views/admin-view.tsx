@@ -6,7 +6,7 @@ import { getApiBaseUrl, resolveMediaUrl } from "@/lib/api";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { Button } from "@/components/ui/button";
 import { products as staticCatalogProducts } from "@/data/products";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { BarChart3, LogOut, Package, ShoppingCart, Users, Settings, Trash2, Eye, FileText, CheckCircle, XCircle, ExternalLink, Upload, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
@@ -94,6 +94,18 @@ export function AdminView() {
     const [dropActive, setDropActive] = useState(false);
     const [editingSlug, setEditingSlug] = useState<string | null>(null);
     const [dbProductSlugs, setDbProductSlugs] = useState<Set<string>>(new Set());
+    const [isNewCategory, setIsNewCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState("");
+
+    const existingCategories = useMemo(() => {
+      const cats = new Set<string>(["lighting", "home-protection", "farm-protection", "fashion-design"]);
+      for (const p of products) {
+        if (p.category) {
+          cats.add(p.category);
+        }
+      }
+      return Array.from(cats);
+    }, [products]);
 
     const loadWebsiteProducts = useCallback(async () => {
       setLoadingProducts(true);
@@ -379,7 +391,16 @@ export function AdminView() {
       const variants = parseVariantLines(formData.get("variants"));
       const priceRaw = formData.get("price") as string;
       const originalPriceRaw = (formData.get("originalPrice") as string) || "";
-      const category = formData.get("category") as string;
+      let category = "";
+      if (isNewCategory) {
+        if (!newCategoryName.trim()) {
+          toast.error("New category name is required");
+          return;
+        }
+        category = newCategoryName.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      } else {
+        category = (formData.get("category") as string) || "";
+      }
       const stockRaw = (formData.get("stock") as string) || "0";
       const tagline = taglineField || description.slice(0, 120);
 
@@ -494,6 +515,8 @@ export function AdminView() {
         (e.target as HTMLFormElement).reset();
         resetLocalMedia();
         setEditingSlug(null);
+        setIsNewCategory(false);
+        setNewCategoryName("");
         await loadWebsiteProducts();
       } catch (err) {
         toast.error((err as Error).message);
@@ -505,6 +528,8 @@ export function AdminView() {
       if (!form) return;
       setEditingSlug(product.slug);
       resetLocalMedia();
+      setIsNewCategory(false);
+      setNewCategoryName("");
       const specs = Array.isArray(product.specs) ? product.specs.map((s: any) => `${s.label} | ${s.value}`).join("\n") : "";
       const variants = Array.isArray(product.variants)
         ? product.variants
@@ -833,17 +858,42 @@ export function AdminView() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium">Category</label>
-                      <select
-                        name="category"
-                        className="mt-2 w-full h-10 px-3 rounded-lg border border-input bg-background"
-                        required
-                      >
-                        <option value="">Select category</option>
-                        <option value="lighting">Lighting</option>
-                        <option value="home-protection">Home Protection</option>
-                        <option value="farm-protection">Farm Protection</option>
-                        <option value="fashion-design">Fashion & Design</option>
-                      </select>
+                      {isNewCategory ? (
+                        <input
+                          name="categoryInput"
+                          type="text"
+                          placeholder="e.g., Sports Gear"
+                          className="mt-2 w-full h-10 px-3 rounded-lg border border-input bg-background"
+                          required
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                        />
+                      ) : (
+                        <select
+                          name="category"
+                          className="mt-2 w-full h-10 px-3 rounded-lg border border-input bg-background"
+                          required
+                        >
+                          <option value="">Select category</option>
+                          {existingCategories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat
+                                .split("-")
+                                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(" ")}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      <div className="mt-2 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setIsNewCategory(!isNewCategory)}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          {isNewCategory ? "Select existing category" : "Or add a new category"}
+                        </button>
+                      </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium">Stock</label>
@@ -1052,6 +1102,8 @@ export function AdminView() {
                         form?.reset();
                         setEditingSlug(null);
                         resetLocalMedia();
+                        setIsNewCategory(false);
+                        setNewCategoryName("");
                       }}
                     >
                       Cancel editing
