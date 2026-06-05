@@ -140,7 +140,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                   type="button"
                   aria-label="Previous image"
                   onClick={() => setSelectedMedia((i) => Math.max(0, i - 1))}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/70 p-2 border border-border shadow-md md:hidden"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/80 hover:bg-background hover:scale-105 active:scale-95 p-2.5 border border-border shadow-lg transition-all duration-200 cursor-pointer"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -148,7 +148,7 @@ export function ProductView({ product, related }: ProductViewProps) {
                   type="button"
                   aria-label="Next image"
                   onClick={() => setSelectedMedia((i) => Math.min(mediaItems.length - 1, i + 1))}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/70 p-2 border border-border shadow-md md:hidden"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 rounded-full bg-background/80 hover:bg-background hover:scale-105 active:scale-95 p-2.5 border border-border shadow-lg transition-all duration-200 cursor-pointer"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
