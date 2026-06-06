@@ -154,7 +154,11 @@ export async function getProductPageData(slug: string) {
 
   const allMerged = await fetchActiveStorefrontProducts();
   const related = allMerged
-    .filter((p) => p.slug !== product.slug && p.category === product.category && p.price)
+    .filter((p) =>
+      p.slug !== product.slug &&
+      p.category === product.category &&
+      (p.price || (p.variants && p.variants.length > 0))
+    )
     .slice(0, 4);
 
   return { product, related };

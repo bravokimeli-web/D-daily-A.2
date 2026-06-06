@@ -17,7 +17,10 @@ type HomeViewProps = {
 
 export function HomeView({ initialCatalog }: HomeViewProps) {
   const { isAdmin } = useAdminAccess();
-  const featured = initialCatalog.filter((p) => p.price != null && p.price > 0);
+  const featured = initialCatalog.filter((p) =>
+    (p.price != null && p.price > 0) ||
+    (p.variants && p.variants.length > 0 && p.variants.some((v) => v.price > 0))
+  );
 
   return (
     <div>

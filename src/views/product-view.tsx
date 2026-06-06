@@ -233,7 +233,7 @@ export function ProductView({ product, related }: ProductViewProps) {
             </div>
           )}
 
-          {product.price && (
+          {displayPrice && (
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="flex items-center border rounded-full">
                 <button
@@ -329,7 +329,7 @@ export function ProductView({ product, related }: ProductViewProps) {
         </div>
       )}
 
-      {product.price && (
+      {displayPrice && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-3 z-30">
           {currentCartQty > 0 ? (
             <div className="flex gap-3">

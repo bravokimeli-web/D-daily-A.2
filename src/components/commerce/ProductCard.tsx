@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils";
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const imageSrc = resolveMediaUrl(String(product.image));
-  const isSoldOut = (product as any).stock !== undefined && Number((product as any).stock) <= 0;
+  const hasVariants = product.variants && product.variants.length > 0;
+  const isSoldOut = hasVariants
+    ? product.variants!.every((v) => v.stock !== undefined && Number(v.stock) <= 0)
+    : (product as any).stock !== undefined && Number((product as any).stock) <= 0;
   const fit: "cover" | "contain" = "contain";
 
   return (
@@ -54,7 +57,11 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="text-xs text-muted-foreground line-clamp-2">{product.tagline}</p>
         <div className="mt-auto pt-3 flex items-center justify-between">
           <div className="font-display font-bold text-lg">
-            {product.price ? (
+            {hasVariants ? (
+              <div className="flex items-center gap-2">
+                {`From ${formatKES(Math.min(...product.variants!.map((v) => v.price)))}`}
+              </div>
+            ) : product.price ? (
               <div className="flex items-center gap-2">
                 {formatKES(product.price)}
                 {product.originalPrice && (
@@ -65,7 +72,7 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-sm text-muted-foreground">Coming soon</span>
             )}
           </div>
-          {product.price && !isSoldOut && (
+          {product.price && !hasVariants && !isSoldOut && (
             <Button
               type="button"
               size="icon"
