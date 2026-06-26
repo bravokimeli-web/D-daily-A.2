@@ -13,6 +13,7 @@ interface VerifyResult {
   status: string;
   total: number;
   paidAt?: string;
+  customerPhone?: string | null;
 }
 
 export default function CheckoutVerifyPage() {
@@ -56,7 +57,7 @@ export default function CheckoutVerifyPage() {
   return (
     <div className="container-px mx-auto max-w-3xl py-16">
       <div className="rounded-3xl border border-border bg-card p-10 shadow-sm">
-        <h1 className="text-3xl font-bold mb-4">Payment Verification</h1>
+        <h1 className="text-3xl font-bold mb-4">Complete your payment</h1>
 
         {loading ? (
           <div className="flex items-center gap-3 text-muted-foreground">
@@ -86,19 +87,32 @@ export default function CheckoutVerifyPage() {
           </div>
         ) : result ? (
           <div className="space-y-6">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5" />
-                <div>
-                  <p className="font-semibold">Payment verified successfully!</p>
-                  <p className="mt-1 text-sm">Order #{result.orderNumber} is now marked as {result.status.replace("_", " ")}.</p>
+            {result.status === "paid" ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">Payment verified successfully!</p>
+                    <p className="mt-1 text-sm">Order #{result.orderNumber} is now marked as {result.status.replace("_", " ")}.</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div>
+                    <p className="font-semibold">Your order is waiting for M-Pesa payment</p>
+                    <p className="mt-1 text-sm">An M-Pesa prompt will be sent to {result.customerPhone ? result.customerPhone : "the phone number you entered"}. Please complete it to confirm the order.</p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid gap-3 rounded-2xl border border-border bg-background p-5 text-sm">
               <p><strong>Order number:</strong> {result.orderNumber}</p>
               <p><strong>Status:</strong> {result.status.replace("_", " ")}</p>
               <p><strong>Total:</strong> KES {result.total.toLocaleString()}</p>
+              {result.customerPhone && <p><strong>M-Pesa number:</strong> {result.customerPhone}</p>}
               {result.paidAt && <p><strong>Paid at:</strong> {new Date(result.paidAt).toLocaleString()}</p>}
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
