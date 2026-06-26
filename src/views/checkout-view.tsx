@@ -18,9 +18,12 @@ export function CheckoutView() {
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
+  const [useDifferentMpesa, setUseDifferentMpesa] = useState(false);
+  const [mpesaPhone, setMpesaPhone] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
-  const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim());
+  const hasMpesaPhoneIfRequired = !useDifferentMpesa || Boolean(mpesaPhone.trim());
+  const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim() && hasMpesaPhoneIfRequired);
   const canSubmit = items.length > 0 && hasRequiredInfo;
 
   const place = async (e: FormEvent<HTMLFormElement>) => {
@@ -28,12 +31,18 @@ export function CheckoutView() {
     setAttemptedSubmit(true);
 
     if (items.length === 0) return toast.error("Your cart is empty.");
-    if (!hasRequiredInfo) return toast.error("Please fill in your name, phone number, city, and address.");
+    if (!hasRequiredInfo) {
+      if (!hasMpesaPhoneIfRequired) {
+        return toast.error("Please enter your M-Pesa phone number for payment.");
+      }
+      return toast.error("Please fill in your name, phone number, city, and address.");
+    }
 
     setLoading(true);
     try {
       const res = await ordersApi.create({
         customer: { name, email: email || undefined, phone: phone || undefined, city, address },
+        mpesaPhone: useDifferentMpesa ? mpesaPhone : undefined,
         items: items.map((i) => ({ slug: i.slug, name: i.name, price: i.price, qty: i.qty, image: i.image })),
         courier,
       });
@@ -121,9 +130,38 @@ export function CheckoutView() {
             <div className="p-4 rounded-2xl border bg-primary-soft/40 flex flex-col gap-3">
               <div className="flex items-start gap-3">
                 <Smartphone className="h-5 w-5 text-primary mt-0.5" />
-                <div>
+                <div className="w-full">
                   <div className="font-semibold">Secure M-Pesa payment</div>
-                  <p className="text-sm text-muted-foreground">After placing the order, you'll receive an M-Pesa prompt on the phone number you entered to complete payment.</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    After placing the order, you'll receive an M-Pesa prompt to complete payment.
+                  </p>
+                  
+                  <div className="mt-4 space-y-4">
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={useDifferentMpesa}
+                        onChange={(e) => setUseDifferentMpesa(e.target.checked)}
+                        className="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                      />
+                      <span>Pay with a different M-Pesa number</span>
+                    </label>
+
+                    {useDifferentMpesa && (
+                      <div className="animate-in fade-in duration-200">
+                        <Field
+                          id="checkout-mpesa-phone"
+                          label="M-Pesa number for payment"
+                          required
+                          type="tel"
+                          placeholder="e.g. 0712 345 678"
+                          value={mpesaPhone}
+                          onChange={(e) => setMpesaPhone(e.target.value)}
+                          aria-invalid={attemptedSubmit && useDifferentMpesa && !mpesaPhone.trim()}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <Button

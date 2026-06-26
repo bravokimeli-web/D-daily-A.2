@@ -91,6 +91,7 @@ export interface CreateOrderPayload {
     city: string;
     address: string;
   };
+  mpesaPhone?: string;
   items: OrderItem[];
   courier?: string;
   notes?: string;
