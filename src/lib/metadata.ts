@@ -66,7 +66,7 @@ export function homeMetadata(): Metadata {
   return buildPageMetadata({
     title: `${SITE_NAME} — Trusted Home, Farm & Pest Protection in Kenya`,
     description:
-      "Premium pest control, lighting, home protection, and farm protection essentials. Fast delivery across Kenya with secure Paystack checkout.",
+      "Premium pest control, lighting, home protection, and farm protection essentials. Fast delivery across Kenya with secure M-Pesa checkout.",
     path: "/",
     keywords: [
       "pest control",
@@ -75,7 +75,7 @@ export function homeMetadata(): Metadata {
       "farm protection",
       "Kenya",
       "online shopping",
-      "Paystack",
+      "M-Pesa",
     ],
     imageAlt: "D-Daily Ltd hero banner",
   });
@@ -103,9 +103,9 @@ export function shopMetadata(category?: string, query?: string): Metadata {
     ? `${category.replace("-", " ")} products | ${SITE_NAME}`
     : `Shop | ${SITE_NAME} — Lighting, Home & Farm Protection`;
   const description = category
-    ? `Shop ${category.replace("-", " ")} products from D-Daily Ltd. Fast delivery in Kenya and secure Paystack checkout.`
+    ? `Shop ${category.replace("-", " ")} products from D-Daily Ltd. Fast delivery in Kenya and secure M-Pesa checkout.`
     : "Browse our complete range of pest control, lighting, home and farm protection products. Fast delivery across Kenya.";
-  const keywords = ["shop", "buy", "Kenya", "fast delivery", "Paystack"];
+  const keywords = ["shop", "buy", "Kenya", "fast delivery", "M-Pesa"];
   if (category) keywords.push(category.replace("-", " "));
   if (query) keywords.push(query);
 

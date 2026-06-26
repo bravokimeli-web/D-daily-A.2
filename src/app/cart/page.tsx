@@ -3,9 +3,9 @@ import { staticPageMetadata } from "@/lib/metadata";
 
 export const metadata = staticPageMetadata(
   "Cart",
-  "Review items in your D-Daily Ltd cart and proceed to secure Paystack checkout with nationwide delivery.",
+  "Review items in your D-Daily Ltd cart and proceed to secure M-Pesa checkout with nationwide delivery.",
   "/cart",
-  ["cart", "checkout", "Kenya", "Paystack"],
+  ["cart", "checkout", "Kenya", "M-Pesa"],
   true,
 );
 

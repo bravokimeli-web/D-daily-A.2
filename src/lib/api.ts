@@ -100,7 +100,7 @@ export interface CreateOrderResponse {
   success: boolean;
   data: {
     order: { id: string; orderNumber: string; total: number; status: string };
-    payment: { authorizationUrl: string; reference: string; accessCode: string };
+    payment: { reference: string; checkoutRequestID: string; merchantRequestID: string; message: string };
   };
 }
 

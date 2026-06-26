@@ -46,7 +46,7 @@ export default function CheckoutVerifyPage() {
 
   const handleNeedHelp = () => {
     toast(
-      "Your order is saved as pending. If payment failed or you canceled the Paystack prompt, return to checkout and complete payment, or contact support if you need assistance.",
+      "Your order is saved as pending. If payment failed or you canceled the M-Pesa prompt, return to checkout and complete payment, or contact support if you need assistance.",
       {
         duration: 8000,
       }

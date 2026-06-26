@@ -24,7 +24,6 @@ interface OrderPayment {
   reference?: string;
   paidAt?: string;
   channel?: string;
-  authorizationUrl?: string;
 }
 
 interface OrderTrack {

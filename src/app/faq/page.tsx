@@ -4,7 +4,7 @@ import { staticPageMetadata } from "@/lib/metadata";
 const faqs = [
   { q: "Do you have a physical store?", a: "Yes — visit us in Garden City, Nairobi." },
   { q: "How long does delivery take?", a: "1–3 business days within Nairobi, 2–5 days countrywide via Swatin, Bolt, G4S or Fargo." },
-  { q: "Can I pay online?", a: "Yes — checkout is handled securely by Paystack, and you can complete payment from your phone or browser." },
+  { q: "Can I pay online?", a: "Yes — checkout is handled securely by M-Pesa, and you can complete payment from your phone." },
   { q: "Are your products safe?", a: "Yes, when used as directed. Each product page includes detailed safety precautions." },
   { q: "Do you offer wholesale or reseller pricing?", a: "Yes — apply via the Reseller program page to access wholesale pricing and commissions." },
 ];

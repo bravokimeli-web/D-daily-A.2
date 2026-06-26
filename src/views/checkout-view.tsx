@@ -39,7 +39,7 @@ export function CheckoutView() {
       });
 
       clear();
-      window.location.href = res.data.payment.authorizationUrl;
+      window.location.href = `/checkout/verify?ref=${encodeURIComponent(res.data.payment.reference)}`;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to place order. Please try again.");
     } finally {
@@ -120,8 +120,8 @@ export function CheckoutView() {
               <div className="flex items-start gap-3">
                 <Smartphone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
-                  <div className="font-semibold">Secure Paystack payment</div>
-                  <p className="text-sm text-muted-foreground">After placing the order, you'll be redirected to Paystack to complete your payment.</p>
+                  <div className="font-semibold">Secure M-Pesa payment</div>
+                  <p className="text-sm text-muted-foreground">After placing the order, you'll receive an M-Pesa prompt on your phone to complete payment.</p>
                 </div>
               </div>
               <Button
@@ -130,7 +130,7 @@ export function CheckoutView() {
                 size="sm"
                 onClick={() =>
                   toast(
-                    "Your order will be saved as pending while you complete payment. If you cancel the Paystack prompt, return here and try again.",
+                    "Your order will be saved as pending while you complete payment. If you cancel the M-Pesa prompt, return here and try again.",
                     { duration: 8000 }
                   )
                 }
