@@ -20,7 +20,7 @@ export function CheckoutView() {
   const [address, setAddress] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
-  const hasRequiredInfo = Boolean(name.trim() && city.trim() && address.trim());
+  const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim());
   const canSubmit = items.length > 0 && hasRequiredInfo;
 
   const place = async (e: FormEvent<HTMLFormElement>) => {
@@ -28,7 +28,7 @@ export function CheckoutView() {
     setAttemptedSubmit(true);
 
     if (items.length === 0) return toast.error("Your cart is empty.");
-    if (!hasRequiredInfo) return toast.error("Please fill in all required fields.");
+    if (!hasRequiredInfo) return toast.error("Please fill in your name, phone number, city, and address.");
 
     setLoading(true);
     try {
@@ -72,13 +72,15 @@ export function CheckoutView() {
             <Field
               id="checkout-phone"
               label="Phone number"
+              required
               type="tel"
               placeholder="e.g. 0712 345 678"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              aria-invalid={attemptedSubmit && !phone.trim()}
             />
             <p className="text-sm text-muted-foreground">
-              Phone is optional, but it helps us confirm delivery and share payment details if needed.
+              Required for M-Pesa STK push. This is the number that will receive the payment prompt.
             </p>
           </Section>
           <Section title="Delivery">
@@ -121,7 +123,7 @@ export function CheckoutView() {
                 <Smartphone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <div className="font-semibold">Secure M-Pesa payment</div>
-                  <p className="text-sm text-muted-foreground">After placing the order, you'll receive an M-Pesa prompt on your phone to complete payment.</p>
+                  <p className="text-sm text-muted-foreground">After placing the order, you'll receive an M-Pesa prompt on the phone number you entered to complete payment.</p>
                 </div>
               </div>
               <Button
