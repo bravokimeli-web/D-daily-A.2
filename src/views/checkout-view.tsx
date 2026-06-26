@@ -66,11 +66,17 @@ export function CheckoutView() {
       }
 
       try {
-        const response = await ordersApi.verify(reference);
+        const response = await ordersApi.paymentStatus(reference);
         if (response.data.status === "paid") {
           stopPolling();
           clear();
           window.location.href = `/checkout/verify?ref=${encodeURIComponent(reference)}`;
+          return;
+        }
+        if (response.data.promptFailed && response.data.stkResultDesc) {
+          stopPolling();
+          setPaymentPhase("error");
+          setPaymentError(response.data.stkResultDesc);
         }
       } catch {
         // Keep polling — webhook may still be in flight.

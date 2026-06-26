@@ -117,6 +117,21 @@ export const ordersApi = {
       `/orders/verify/${reference}`
     ),
 
+  paymentStatus: (reference: string) =>
+    request<{
+      success: boolean;
+      data: {
+        orderNumber: string;
+        status: string;
+        total: number;
+        paidAt?: string;
+        customerPhone?: string | null;
+        stkResultCode?: number | null;
+        stkResultDesc?: string;
+        promptFailed?: boolean;
+      };
+    }>(`/orders/payment-status/${reference}`),
+
   getByOrderNumber: (orderNumber: string) =>
     request<{ success: boolean; data: unknown }>(`/orders/${orderNumber}`),
 };
