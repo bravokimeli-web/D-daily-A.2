@@ -92,8 +92,8 @@ export default function CheckoutVerifyPage() {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5" />
                   <div>
-                    <p className="font-semibold">Payment verified successfully!</p>
-                    <p className="mt-1 text-sm">Order #{result.orderNumber} is now marked as {result.status.replace("_", " ")}.</p>
+                    <p className="font-semibold">Payment successful!</p>
+                    <p className="mt-1 text-sm">Order #{result.orderNumber} is confirmed. We will process your order shortly.</p>
                   </div>
                 </div>
               </div>
@@ -102,8 +102,10 @@ export default function CheckoutVerifyPage() {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5" />
                   <div>
-                    <p className="font-semibold">Your order is waiting for M-Pesa payment</p>
-                    <p className="mt-1 text-sm">An M-Pesa prompt will be sent to {result.customerPhone ? result.customerPhone : "the phone number you entered"}. Please complete it to confirm the order.</p>
+                    <p className="font-semibold">Payment not confirmed yet</p>
+                    <p className="mt-1 text-sm">
+                      If you have not paid, return to checkout to try again. If you already paid, wait a moment and refresh this page.
+                    </p>
                   </div>
                 </div>
               </div>

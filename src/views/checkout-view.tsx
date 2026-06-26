@@ -3,56 +3,126 @@
 import { useCart, cartTotals } from "@/store/carts";
 import { formatKES } from "@/data/products";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Truck, Loader2 } from "lucide-react";
-import { FormEvent, InputHTMLAttributes, useState } from "react";
+import { Smartphone, Truck, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { FormEvent, InputHTMLAttributes, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ordersApi } from "@/lib/api";
+
+type PaymentPhase = "idle" | "sending" | "awaiting" | "error";
+
+const POLL_INTERVAL_MS = 4000;
+const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 
 export function CheckoutView() {
   const { items, clear } = useCart();
   const { subtotal } = cartTotals(items);
   const [courier, setCourier] = useState("Swatin");
-  const [loading, setLoading] = useState(false);
+  const [paymentPhase, setPaymentPhase] = useState<PaymentPhase>("idle");
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentReference, setPaymentReference] = useState<string | null>(null);
+  const [awaitingPhone, setAwaitingPhone] = useState<string | null>(null);
+  const pollStartedAt = useRef<number | null>(null);
+  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-  const [useDifferentMpesa, setUseDifferentMpesa] = useState(false);
   const [mpesaPhone, setMpesaPhone] = useState("");
+  const [mpesaPhoneTouched, setMpesaPhoneTouched] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
-  const hasMpesaPhoneIfRequired = !useDifferentMpesa || Boolean(mpesaPhone.trim());
-  const hasRequiredInfo = Boolean(name.trim() && phone.trim() && city.trim() && address.trim() && hasMpesaPhoneIfRequired);
-  const canSubmit = items.length > 0 && hasRequiredInfo;
+  useEffect(() => {
+    if (!mpesaPhoneTouched) setMpesaPhone(phone);
+  }, [phone, mpesaPhoneTouched]);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimer.current) clearInterval(pollTimer.current);
+    };
+  }, []);
+
+  const stopPolling = () => {
+    if (pollTimer.current) {
+      clearInterval(pollTimer.current);
+      pollTimer.current = null;
+    }
+    pollStartedAt.current = null;
+  };
+
+  const startPaymentPolling = (reference: string) => {
+    stopPolling();
+    pollStartedAt.current = Date.now();
+
+    pollTimer.current = setInterval(async () => {
+      if (pollStartedAt.current && Date.now() - pollStartedAt.current > POLL_TIMEOUT_MS) {
+        stopPolling();
+        setPaymentPhase("error");
+        setPaymentError(
+          "Payment was not confirmed in time. If you completed the M-Pesa prompt, wait a moment and try again, or contact support with your order reference."
+        );
+        return;
+      }
+
+      try {
+        const response = await ordersApi.verify(reference);
+        if (response.data.status === "paid") {
+          stopPolling();
+          clear();
+          window.location.href = `/checkout/verify?ref=${encodeURIComponent(reference)}`;
+        }
+      } catch {
+        // Keep polling — webhook may still be in flight.
+      }
+    }, POLL_INTERVAL_MS);
+  };
+
+  const resetPayment = () => {
+    stopPolling();
+    setPaymentPhase("idle");
+    setPaymentError(null);
+    setPaymentReference(null);
+    setAwaitingPhone(null);
+  };
+
+  const hasRequiredInfo = Boolean(
+    name.trim() && phone.trim() && mpesaPhone.trim() && city.trim() && address.trim()
+  );
+  const canSubmit = items.length > 0 && hasRequiredInfo && paymentPhase !== "sending" && paymentPhase !== "awaiting";
+  const isBusy = paymentPhase === "sending" || paymentPhase === "awaiting";
 
   const place = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setAttemptedSubmit(true);
+    setPaymentError(null);
 
     if (items.length === 0) return toast.error("Your cart is empty.");
     if (!hasRequiredInfo) {
-      if (!hasMpesaPhoneIfRequired) {
-        return toast.error("Please enter your M-Pesa phone number for payment.");
-      }
-      return toast.error("Please fill in your name, phone number, city, and address.");
+      return toast.error("Please fill in all required fields, including your M-Pesa payment number.");
     }
 
-    setLoading(true);
+    setPaymentPhase("sending");
     try {
       const res = await ordersApi.create({
-        customer: { name, email: email || undefined, phone: phone || undefined, city, address },
-        mpesaPhone: useDifferentMpesa ? mpesaPhone : undefined,
+        customer: { name, email: email || undefined, phone, city, address },
+        mpesaPhone,
         items: items.map((i) => ({ slug: i.slug, name: i.name, price: i.price, qty: i.qty, image: i.image })),
         courier,
       });
 
-      clear();
-      window.location.href = `/checkout/verify?ref=${encodeURIComponent(res.data.payment.reference)}`;
+      const reference = res.data.payment.reference;
+      const payPhone = res.data.payment.customerPhone || mpesaPhone;
+
+      setPaymentReference(reference);
+      setAwaitingPhone(payPhone);
+      setPaymentPhase("awaiting");
+      startPaymentPolling(reference);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to place order. Please try again.");
-    } finally {
-      setLoading(false);
+      setPaymentPhase("error");
+      const message = err instanceof Error ? err.message : "Failed to send M-Pesa prompt. Please try again.";
+      setPaymentError(message);
+      toast.error(message);
     }
   };
 
@@ -68,6 +138,7 @@ export function CheckoutView() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isBusy}
               aria-invalid={attemptedSubmit && !name}
             />
             <Field
@@ -77,20 +148,20 @@ export function CheckoutView() {
               placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isBusy}
             />
             <Field
               id="checkout-phone"
-              label="Phone number"
+              label="Contact phone"
               required
               type="tel"
               placeholder="e.g. 0712 345 678"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              disabled={isBusy}
               aria-invalid={attemptedSubmit && !phone.trim()}
             />
-            <p className="text-sm text-muted-foreground">
-              Required for M-Pesa STK push. This is the number that will receive the payment prompt.
-            </p>
+            <p className="text-sm text-muted-foreground">Used for delivery updates and order contact.</p>
           </Section>
           <Section title="Delivery">
             <Field
@@ -99,6 +170,7 @@ export function CheckoutView() {
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              disabled={isBusy}
               aria-invalid={attemptedSubmit && !city}
             />
             <Field
@@ -107,6 +179,7 @@ export function CheckoutView() {
               required
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              disabled={isBusy}
               aria-invalid={attemptedSubmit && !address}
             />
             <div>
@@ -117,7 +190,8 @@ export function CheckoutView() {
                     type="button"
                     key={c}
                     onClick={() => setCourier(c)}
-                    className={`p-3 rounded-xl border text-sm font-medium transition ${courier === c ? "border-primary bg-primary-soft text-primary" : "hover:border-primary/40"}`}
+                    disabled={isBusy}
+                    className={`p-3 rounded-xl border text-sm font-medium transition disabled:opacity-50 ${courier === c ? "border-primary bg-primary-soft text-primary" : "hover:border-primary/40"}`}
                   >
                     <Truck className="h-4 w-4 mx-auto mb-1" />
                     {c}
@@ -127,50 +201,82 @@ export function CheckoutView() {
             </div>
           </Section>
           <Section title="Payment">
-            <div className="p-4 rounded-2xl border bg-primary-soft/40 flex flex-col gap-3">
+            <div className="p-4 rounded-2xl border bg-primary-soft/40 flex flex-col gap-4">
               <div className="flex items-start gap-3">
-                <Smartphone className="h-5 w-5 text-primary mt-0.5" />
-                <div className="w-full">
-                  <div className="font-semibold">Secure M-Pesa payment</div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    After placing the order, you'll receive an M-Pesa prompt to complete payment.
-                  </p>
-                  
-                  <div className="mt-4 space-y-4">
-                    <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium">
-                      <input
-                        type="checkbox"
-                        checked={useDifferentMpesa}
-                        onChange={(e) => setUseDifferentMpesa(e.target.checked)}
-                        className="rounded border-input text-primary focus:ring-primary h-4 w-4"
-                      />
-                      <span>Pay with a different M-Pesa number</span>
-                    </label>
-
-                    {useDifferentMpesa && (
-                      <div className="animate-in fade-in duration-200">
-                        <Field
-                          id="checkout-mpesa-phone"
-                          label="M-Pesa number for payment"
-                          required
-                          type="tel"
-                          placeholder="e.g. 0712 345 678"
-                          value={mpesaPhone}
-                          onChange={(e) => setMpesaPhone(e.target.value)}
-                          aria-invalid={attemptedSubmit && useDifferentMpesa && !mpesaPhone.trim()}
-                        />
-                      </div>
-                    )}
+                <Smartphone className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div className="w-full space-y-4">
+                  <div>
+                    <div className="font-semibold">Secure M-Pesa payment</div>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      Enter the M-Pesa number to charge. We will send the STK prompt to that phone when you pay.
+                    </p>
                   </div>
+
+                  <Field
+                    id="checkout-mpesa-phone"
+                    label="M-Pesa payment number"
+                    required
+                    type="tel"
+                    placeholder="e.g. 0712 345 678"
+                    value={mpesaPhone}
+                    onChange={(e) => {
+                      setMpesaPhoneTouched(true);
+                      setMpesaPhone(e.target.value);
+                    }}
+                    disabled={isBusy}
+                    aria-invalid={attemptedSubmit && !mpesaPhone.trim()}
+                  />
+
+                  {paymentPhase === "sending" && (
+                    <div className="rounded-xl border border-primary/30 bg-background p-4 flex items-center gap-3 text-sm">
+                      <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" />
+                      <div>
+                        <p className="font-semibold">Sending M-Pesa prompt…</p>
+                        <p className="text-muted-foreground mt-0.5">Please wait while we contact Safaricom.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentPhase === "awaiting" && (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 text-sm space-y-2">
+                      <div className="flex items-start gap-3">
+                        <Loader2 className="h-5 w-5 animate-spin shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Check your phone</p>
+                          <p className="mt-1">
+                            An M-Pesa prompt was sent to <strong>{awaitingPhone}</strong>. Enter your PIN on your phone to
+                            complete payment.
+                          </p>
+                          <p className="mt-2 text-amber-800">Waiting for payment confirmation…</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentPhase === "error" && paymentError && (
+                    <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                      <div className="flex items-start gap-3 text-destructive">
+                        <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Payment prompt failed</p>
+                          <p className="mt-1 text-destructive/90">{paymentError}</p>
+                        </div>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" className="mt-3" onClick={resetPayment}>
+                        Try again
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
+                disabled={paymentPhase === "sending"}
                 onClick={() =>
                   toast(
-                    "Your order will be saved as pending while you complete payment. If you cancel the M-Pesa prompt, return here and try again.",
+                    "Enter your M-Pesa PIN when the prompt appears on your phone. If you don't receive it within a minute, check the number and try again.",
                     { duration: 8000 }
                   )
                 }
@@ -205,14 +311,27 @@ export function CheckoutView() {
             <span>Total</span>
             <span>{formatKES(subtotal)}</span>
           </div>
-          <Button type="submit" className="w-full rounded-full h-12" disabled={!canSubmit || loading}>
-            {loading ? (
+
+          {paymentPhase === "awaiting" && paymentReference && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900 flex gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>Prompt sent. Complete payment on your phone — this page will update automatically.</span>
+            </div>
+          )}
+
+          <Button type="submit" className="w-full rounded-full h-12" disabled={!canSubmit}>
+            {paymentPhase === "sending" ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Processing…
+                Sending prompt…
+              </>
+            ) : paymentPhase === "awaiting" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Waiting for payment…
               </>
             ) : (
-              "Place order & Pay"
+              "Pay with M-Pesa"
             )}
           </Button>
         </aside>
@@ -242,7 +361,7 @@ function Field({ label, ...props }: { label: string } & InputHTMLAttributes<HTML
       <input
         {...props}
         id={props.id}
-        className={`mt-1 w-full h-11 px-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring ${
+        className={`mt-1 w-full h-11 px-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60 ${
           invalid ? "border-destructive/80 ring-destructive/40" : "border-input"
         }`}
       />
